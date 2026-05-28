@@ -1,0 +1,39 @@
+Dove stanno nella pagina
+Condizioni generali → accordion (tutto chiuso di default); non sono checkbox.
+Sotto, blocco “Consensi” → le dichiarazioni sotto.
+Checkbox obbligatorie (3)
+1. Condizioni generali
+
+Label: Dichiaro di aver letto e accettato le Condizioni generali di partecipazione.
+Deve essere spuntata per inviare.
+2. Clausole 1341/1342
+
+Label: Dichiaro di approvare specificamente le clausole relative alla natura dell'Evento e componente gastronomica accessoria, allergie e intolleranze, esclusione del diritto di recesso, cancellazioni, rinvii e riprogrammazioni, modifiche dell'Evento, comportamento dei partecipanti, utilizzo dell'immagine, limitazioni di responsabilità e foro competente, ai sensi e per gli effetti degli artt. 1341 e 1342 c.c.
+Deve essere spuntata per inviare.
+3. Privacy
+
+Label: Dichiaro di aver preso visione dell' [informativa privacy] .
+informativa privacy = link/button cliccabile (non spunta la checkbox).
+Al click si apre/chiude sotto la checkbox il testo da privacyContent.ts (tutto visibile, senza sotto-accordion).
+Non serve aprire il testo per inviare: basta spuntare la checkbox.
+Deve essere spuntata per inviare.
+Scelta obbligatoria separata (radio, non checkbox)
+Utilizzo immagine
+
+Titolo: Utilizzo dell'immagine per finalità promozionali
+Sottotitolo: Scelta separata e revocabile, indipendente dalle Condizioni generali.
+Opzione A: Acconsento all'utilizzo della mia immagine per finalità promozionali.
+Opzione B: Non acconsento all'utilizzo della mia immagine per finalità promozionali.
+Una delle due è obbligatoria.
+Minorenne (se serve lo stesso flusso)
+Prima dei consensi: Il partecipante è minorenne? → Sì / No (obbligatorio).
+
+Se Sì, compaiono in più:
+
+Campo testo: Nome e cognome del genitore/tutore/accompagnatore (obbligatorio)
+Checkbox obbligatoria: Dichiaro, in qualità di genitore/tutore/soggetto legittimato, di autorizzare la partecipazione del minore all'Evento e di assumere la responsabilità della sua vigilanza durante l'Evento.
+Checkbox obbligatoria: Dichiaro, in qualità di genitore/tutore/soggetto legittimato, di aver comunicato eventuali allergie, intolleranze o esigenze alimentari particolari del minore.
+Checkbox facoltativa: Acconsento, in qualità di genitore/tutore/soggetto legittimato, all'utilizzo dell'immagine del minore in modo riconoscibile per finalità promozionali, social, editoriali e di comunicazione relative al progetto Cooker Girl e al Cooker Loft.
+Nota sotto: il consenso immagine del minore è facoltativo e revocabile.
+Nota sotto il bottone invio
+Inviando il modulo confermi la veridicità dei dati forniti, la presa visione delle Condizioni e dell'informativa privacy, e le dichiarazioni di cui sopra.
