@@ -44,6 +44,13 @@ const EMBED_FRAME_ANCESTORS = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // External integrations like Stripe Webhooks REFUSE to follow 308
+  // trailing-slash redirects (they would expose the body to an attacker who
+  // controls a downstream hop). We make `/api/stripe/webhook/` and
+  // `/api/stripe/webhook` resolve to the same handler so a stray slash in
+  // the dashboard configuration never breaks delivery again.
+  skipTrailingSlashRedirect: true,
+
   async headers() {
     return [
       {
