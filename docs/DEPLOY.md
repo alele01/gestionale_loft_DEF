@@ -37,7 +37,7 @@ produzione.
 2. Framework preset: **Next.js** (autodetected).
 3. Build & Output settings: **lascia i default**.
 4. Root directory: `./` (default).
-5. Node version: `20.x` (è già pinned via `package.json` → `engines.node`).
+5. Node version: `22.x` (LTS corrente, già pinned via `package.json` → `engines.node`). Evita major open-ended (`>=20`) per non subire upgrade automatici sulla prossima major Node.
 6. Skip "Deploy" alla prima schermata: vogliamo prima le env.
 
 ## 3. Environment variables (scope: Production)
