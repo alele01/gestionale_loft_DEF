@@ -3,6 +3,8 @@
 Guida operativa al go-live in produzione. Aggiornata alla fase
 "Production deploy" (Stripe sandbox + dominio Vercel di default).
 
+Ultimo aggiornamento: 2026-05-28.
+
 ## 0. Prerequisiti
 
 - Account Vercel collegato al repository Git.
