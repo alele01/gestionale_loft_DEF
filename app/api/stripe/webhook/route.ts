@@ -33,9 +33,14 @@ import { verifyStripeWebhook } from "@/server/stripe";
  * verification (Stripe expects this to flag misconfiguration).
  *
  * Runtime: nodejs (required for raw body access).
+ *
+ * Function settings (Route Segment Config — preferred over vercel.json
+ * `functions` for the Next.js App Router): max 30s timeout so we never
+ * hit Vercel's default 10s Hobby/Pro limit during peak-traffic retries.
  */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 export async function POST(request: Request): Promise<Response> {
   // 1. Read raw body for HMAC verification. NEVER parse JSON first.

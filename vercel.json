@@ -10,10 +10,5 @@
       "path": "/api/cron/xml-export",
       "schedule": "0 2 1 * *"
     }
-  ],
-  "functions": {
-    "app/api/stripe/webhook/route.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }

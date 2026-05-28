@@ -200,7 +200,7 @@ git push origin v1.0.0-prod-sandbox
 - Tutti i form pubblici hanno rate limit Postgres-backed (migration
   `20260528130000_rate_limit_buckets.sql`). Non serve Upstash / KV
   esterna.
-- Webhook Stripe usa `maxDuration: 30s` (configurato in `vercel.json`)
+- Webhook Stripe usa `maxDuration = 30` (configurato come Route Segment Config in `app/api/stripe/webhook/route.ts`, non in `vercel.json`: per l'App Router il pattern `functions` di `vercel.json` non matcha `app/api/.../route.ts`)
   per evitare timeout in worst case.
 - Header globali: HSTS, X-Content-Type-Options, Referrer-Policy,
   Permissions-Policy. `frame-ancestors` ristretto a cookergirl.com per
