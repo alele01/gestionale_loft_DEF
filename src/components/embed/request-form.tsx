@@ -72,10 +72,19 @@ export function RequestForm({
     return <SuccessState event={event} people={state.people} compact={compact} />;
   }
 
+  if (compact) {
+    return (
+      <div className="space-y-4">
+        <FormBody event={event} action={formAction} state={state} compact />
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
-      {!compact && <BrandHeader subtitle="Richiesta di prenotazione" />}
-      {!compact && <EventHeader event={event} />}
+      <BrandHeader subtitle="Richiesta di prenotazione" />
+      <EventHeader event={event} />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Richiedi un posto</CardTitle>
@@ -97,10 +106,12 @@ function FormBody({
   event,
   action,
   state,
+  compact = false,
 }: {
   event: PublicEvent;
   action: (formData: FormData) => void;
   state: SubmitRequestState;
+  compact?: boolean;
 }) {
   const [people, setPeople] = React.useState(2);
   const [terms, setTerms] = React.useState(false);
@@ -111,7 +122,7 @@ function FormBody({
   const globalError = state.status === "error" ? state.message : null;
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="cl-form space-y-4">
       <input type="hidden" name="eventId" value={event.id} />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -209,13 +220,22 @@ function FormBody({
         />
       </Field>
 
-      <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-        <h3 className="text-sm font-semibold">Consensi obbligatori</h3>
+      <div className={compact
+        ? "space-y-2 border-t pt-4"
+        : "space-y-3 rounded-lg border bg-muted/30 p-4"
+      }>
+        <h3 className={compact
+          ? "cl-consent-title text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+          : "text-sm font-semibold"
+        }>
+          Consensi obbligatori
+        </h3>
         <ConsentCheckbox
           id="consentTerms"
           name="consentTerms"
           checked={terms}
           onChange={setTerms}
+          compact={compact}
           label={
             <>
               Dichiaro di aver letto e accettato i{" "}
@@ -235,6 +255,7 @@ function FormBody({
           name="consentPrivacy"
           checked={privacy}
           onChange={setPrivacy}
+          compact={compact}
           label={
             <>
               Dichiaro di aver letto l&apos;
@@ -248,6 +269,7 @@ function FormBody({
           name="consentHealth"
           checked={health}
           onChange={setHealth}
+          compact={compact}
           label={
             <>
               Esprimo il mio{" "}
@@ -418,17 +440,22 @@ function ConsentCheckbox({
   checked,
   onChange,
   label,
+  compact = false,
 }: {
   id: string;
   name: string;
   checked: boolean;
   onChange: (v: boolean) => void;
   label: React.ReactNode;
+  compact?: boolean;
 }) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-md border bg-card p-3"
+      className={compact
+        ? "flex cursor-pointer items-start gap-3 py-1.5"
+        : "flex cursor-pointer items-start gap-3 rounded-md border bg-card p-3"
+      }
     >
       <Checkbox
         id={id}
