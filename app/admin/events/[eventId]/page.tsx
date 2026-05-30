@@ -15,14 +15,17 @@ import { PriceLabel } from "@/components/shared/price-label";
 import { EventStatusBadge } from "@/components/shared/status-badge";
 import { EmbedCodeBlock } from "@/components/admin/embed-code-block";
 import { EventDetailActions } from "@/components/admin/event-detail-actions";
+import { RequestsBoard } from "@/components/admin/requests-board";
 import { DataField } from "@/components/shared/data-field";
 import { formatDateTime } from "@/lib/format";
+import { toRequestListItem } from "@/lib/request-list";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { serverEnv } from "@/server/env";
 import {
   getEventById,
   getEventCounters,
 } from "@/server/events/queries";
+import { listRequestsForEvent } from "@/server/requests/queries";
 import type { EventStatus } from "@/server/events/schema";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +41,8 @@ export default async function EventDetailPage({
   if (!event) notFound();
 
   const counters = await getEventCounters(event.id);
+  const eventRequests = await listRequestsForEvent(event.id);
+  const requestItems = eventRequests.map(toRequestListItem);
   const availableSeats = Math.max(0, event.capacity - counters.bookingsPaid);
   const status = event.status as EventStatus;
   const isDraft = status === "draft";
@@ -225,6 +230,23 @@ export default async function EventDetailPage({
           ) : null}
         </CardContent>
       </Card>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold">
+            Prenotazioni dell&apos;evento
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Tutte le richieste arrivate per questo evento. Filtra per stato e
+            clicca una riga per aprire il dettaglio.
+          </p>
+        </div>
+        <RequestsBoard
+          items={requestItems}
+          showEvent={false}
+          emptyLabel="Nessuna prenotazione per questo evento."
+        />
+      </div>
     </>
   );
 }
