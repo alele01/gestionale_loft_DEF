@@ -103,37 +103,77 @@
 
 /*
  * Customer-facing form overrides.
- * Scoped to .cl-form (added to the <form> element in request-form.tsx)
- * inside .cooker-brand so these never touch the admin UI.
+ * Scoped to .cl-form inside .cooker-brand — never touches admin UI.
  *
- * Goals:
- *   - Labels: small uppercase tracking, warm brown — matching legacy form CSS
- *   - Inputs/textarea: warm #fffaf7 background, 48 px min-height
- *   - Submit button: diagonal gradient #AA2620 → #ED7952 (same as old CTA)
+ * Field labels only (.cl-field-label): small uppercase — NOT consent text.
+ * Consent labels (.cl-consent-label): normal sentence case, readable.
  */
-.cooker-brand .cl-form label {
-  font-size: 0.6875rem;   /* 11px */
+.cooker-brand .cl-form .cl-field-label {
+  font-size: 0.8125rem; /* 13px — matches legacy JetFormBuilder */
   font-weight: 700;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: #78423f;
+}
+
+.cooker-brand .cl-form .cl-section-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #78423f;
+}
+
+.cooker-brand .cl-form .cl-consent-label {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.55;
+  color: #2f1e1a;
+}
+
+.cooker-brand .cl-form .cl-doc-link {
+  color: #aa2620;
+}
+
+.cooker-brand .cl-form .cl-doc-link:hover {
   color: #78423f;
 }
 
 .cooker-brand .cl-form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .cooker-brand .cl-form textarea {
   background-color: #fffaf7;
-  min-height: 48px;
+  border-color: rgba(120, 66, 63, 0.18);
+  min-height: 50px;
+  font-size: 0.9375rem; /* 15px */
+  color: #2f1e1a;
+  box-shadow: none;
+}
+
+.cooker-brand .cl-form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus-visible,
+.cooker-brand .cl-form textarea:focus-visible {
+  border-color: #aa2620;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(170, 38, 32, 0.08);
 }
 
 .cooker-brand .cl-form textarea {
-  min-height: 90px;
+  min-height: 100px;
+  resize: vertical;
 }
 
-/* Gradient CTA button — applied only when not disabled */
+.cooker-brand .cl-form input::placeholder,
+.cooker-brand .cl-form textarea::placeholder {
+  color: rgba(120, 66, 63, 0.55);
+}
+
+/* Gradient CTA button */
 .cooker-brand .cl-form button[type="submit"]:not(:disabled) {
   background: linear-gradient(135deg, #aa2620 0%, #ed7952 100%);
   border: none;
-  font-size: 0.75rem;
+  min-height: 52px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -144,4 +184,9 @@
 .cooker-brand .cl-form button[type="submit"]:hover:not(:disabled) {
   box-shadow: 0 12px 28px rgba(170, 38, 32, 0.28);
   opacity: 0.95;
+}
+
+/* Embed: flush with host page, no extra horizontal inset */
+.cooker-brand .cl-form--compact {
+  margin: 0;
 }

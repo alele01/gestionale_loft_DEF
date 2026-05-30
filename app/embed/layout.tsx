@@ -22,9 +22,9 @@ export default function EmbedLayout({
       <style>{`html,body{background:transparent !important;}`}</style>
       <EmbedAutoResize />
       <div
-        className={`cooker-brand bg-transparent px-2 py-3 text-foreground sm:px-4 sm:py-4 ${brandFont.className}`}
+        className={`cooker-brand bg-transparent py-2 text-foreground ${brandFont.className}`}
       >
-        <div className="mx-auto w-full max-w-xl">{children}</div>
+        <div className="w-full">{children}</div>
       </div>
     </>
   );

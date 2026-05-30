@@ -50,7 +50,7 @@ function DocLink({ href, children }: { href: string; children: React.ReactNode }
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-medium underline underline-offset-2"
+      className="cl-doc-link font-medium underline underline-offset-2"
     >
       {children}
     </a>
@@ -74,9 +74,8 @@ export function RequestForm({
 
   if (compact) {
     return (
-      <div className="space-y-4">
+      <div>
         <FormBody event={event} action={formAction} state={state} compact />
-        <Footer />
       </div>
     );
   }
@@ -122,11 +121,14 @@ function FormBody({
   const globalError = state.status === "error" ? state.message : null;
 
   return (
-    <form action={action} className="cl-form space-y-4">
+    <form
+      action={action}
+      className={compact ? "cl-form cl-form--compact space-y-5" : "cl-form space-y-4"}
+    >
       <input type="hidden" name="eventId" value={event.id} />
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field id="firstName" label="Nome" required error={fieldErrors.firstName}>
+      <div className={compact ? "grid gap-4 sm:grid-cols-2" : "grid gap-3 sm:grid-cols-2"}>
+        <Field id="firstName" label="Nome" required error={fieldErrors.firstName} compact={compact}>
           <Input
             id="firstName"
             name="firstName"
@@ -137,7 +139,7 @@ function FormBody({
             placeholder="Mario"
           />
         </Field>
-        <Field id="lastName" label="Cognome" required error={fieldErrors.lastName}>
+        <Field id="lastName" label="Cognome" required error={fieldErrors.lastName} compact={compact}>
           <Input
             id="lastName"
             name="lastName"
@@ -148,7 +150,7 @@ function FormBody({
             placeholder="Rossi"
           />
         </Field>
-        <Field id="email" label="Email" required error={fieldErrors.email}>
+        <Field id="email" label="Email" required error={fieldErrors.email} compact={compact}>
           <Input
             id="email"
             name="email"
@@ -159,7 +161,7 @@ function FormBody({
             placeholder="nome@example.com"
           />
         </Field>
-        <Field id="phone" label="Telefono" required error={fieldErrors.phone}>
+        <Field id="phone" label="Telefono" required error={fieldErrors.phone} compact={compact}>
           <Input
             id="phone"
             name="phone"
@@ -172,7 +174,7 @@ function FormBody({
             placeholder="+39 333 1122334"
           />
         </Field>
-        <Field id="people" label="Persone" required error={fieldErrors.people}>
+        <Field id="people" label="Persone" required error={fieldErrors.people} compact={compact}>
           <Input
             id="people"
             name="people"
@@ -192,13 +194,18 @@ function FormBody({
 
       <Field
         id="dietaryNotes"
+        compact={compact}
         label={
           <>
             Allergie, intolleranze o esigenze alimentari di{" "}
             <strong>tutti i partecipanti</strong>
           </>
         }
-        hint="Indica qui le allergie / intolleranze / esigenze alimentari di TUTTI i partecipanti inclusi nella prenotazione (incluso te). Lasciare il campo vuoto significa dichiarare che NESSUNO dei partecipanti ha allergie da segnalare."
+        hint={
+          compact
+            ? undefined
+            : "Indica qui le allergie / intolleranze / esigenze alimentari di TUTTI i partecipanti inclusi nella prenotazione (incluso te). Lasciare il campo vuoto significa dichiarare che NESSUNO dei partecipanti ha allergie da segnalare."
+        }
       >
         <Textarea
           id="dietaryNotes"
@@ -211,7 +218,8 @@ function FormBody({
       <Field
         id="specialOccasion"
         label="Occasione speciale"
-        hint="Es. compleanno, anniversario. Facoltativo."
+        compact={compact}
+        hint={compact ? undefined : "Es. compleanno, anniversario. Facoltativo."}
       >
         <Input
           id="specialOccasion"
@@ -221,11 +229,11 @@ function FormBody({
       </Field>
 
       <div className={compact
-        ? "space-y-2 border-t pt-4"
+        ? "space-y-3 border-t border-[rgba(120,66,63,0.12)] pt-5"
         : "space-y-3 rounded-lg border bg-muted/30 p-4"
       }>
         <h3 className={compact
-          ? "cl-consent-title text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+          ? "cl-section-title"
           : "text-sm font-semibold"
         }>
           Consensi obbligatori
@@ -302,19 +310,31 @@ function FormBody({
         </div>
       ) : null}
 
-      <SubmitButton disabled={!consentsOk} />
-      <p className="text-center text-[11px] text-muted-foreground">
-        Non riceverai un addebito ora: il pagamento avverrà solo dopo
-        l&apos;eventuale accettazione.
-      </p>
+      <SubmitButton disabled={!consentsOk} compact={compact} />
+      {!compact ? (
+        <p className="text-center text-[11px] text-muted-foreground">
+          Non riceverai un addebito ora: il pagamento avverrà solo dopo
+          l&apos;eventuale accettazione.
+        </p>
+      ) : null}
     </form>
   );
 }
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
+function SubmitButton({
+  disabled,
+  compact = false,
+}: {
+  disabled: boolean;
+  compact?: boolean;
+}) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={disabled || pending} className="w-full">
+    <Button
+      type="submit"
+      disabled={disabled || pending}
+      className={compact ? "w-full min-h-[52px]" : "w-full"}
+    >
       {pending ? "Invio in corso…" : "Invia richiesta"}
     </Button>
   );
@@ -410,6 +430,7 @@ function Field({
   hint,
   error,
   children,
+  compact = false,
 }: {
   id: string;
   label: React.ReactNode;
@@ -417,12 +438,13 @@ function Field({
   hint?: string;
   error?: string;
   children: React.ReactNode;
+  compact?: boolean;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id} className="flex items-center gap-1">
+    <div className={compact ? "space-y-2" : "space-y-1.5"}>
+      <Label htmlFor={id} className="cl-field-label flex items-center gap-1">
         {label}
-        {required ? <span className="text-rose-600">*</span> : null}
+        {required ? <span className="text-[#AA2620]">*</span> : null}
       </Label>
       {children}
       {error ? (
@@ -469,7 +491,7 @@ function ConsentCheckbox({
         always receives the field and can validate against z.literal("on").
       */}
       <input type="hidden" name={name} value={checked ? "on" : ""} />
-      <span className="text-sm leading-snug">{label}</span>
+      <span className="cl-consent-label">{label}</span>
     </label>
   );
 }
