@@ -2,10 +2,7 @@ import "server-only";
 
 import { appendAuditLogWithClient } from "@/server/audit/log";
 import { AUDIT_ACTIONS, AUDIT_ACTORS, AUDIT_ENTITIES } from "@/server/audit-actions";
-import {
-  sendE1RequestReceived,
-  sendE8AdminNewRequest,
-} from "@/server/email";
+import { sendE1RequestReceived } from "@/server/email";
 
 import { createActionContext } from "../context";
 import { ConsentMissingError, NotFoundError, ValidationError } from "../errors";
@@ -124,32 +121,8 @@ export async function submitBookingRequest(
     });
   }
 
-  if (ctx.settings.admin_new_request_email_enabled) {
-    const adminsRes = await ctx.client
-      .from("admin_users")
-      .select("id, email");
-    if (adminsRes.error) {
-      // eslint-disable-next-line no-console
-      console.error("[E8] failed to fetch admin_users", adminsRes.error);
-    } else {
-      const fullName =
-        `${data.requester_first_name} ${data.requester_last_name}`.trim();
-      await Promise.all(
-        (adminsRes.data ?? []).map((admin) =>
-          sendE8AdminNewRequest({
-            requestId: data.id,
-            adminId: admin.id,
-            adminEmail: admin.email,
-            eventTitle: eventForEmail.title,
-            eventStartsAt: eventForEmail.starts_at,
-            people: data.people,
-            requesterFullName: fullName,
-            requesterEmail: data.requester_email,
-          })
-        )
-      );
-    }
-  }
+  // E8 (admin notification on new request) intentionally removed: admins
+  // do not receive an email for every new booking request anymore.
 
   return { request: data };
 }

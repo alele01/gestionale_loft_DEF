@@ -90,8 +90,10 @@ export function EventForm(props: EventFormProps) {
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [globalError, setGlobalError] = React.useState<string | null>(null);
 
+  // Capienza is just an internal signal (cap used when accepting requests),
+  // so it stays editable even after publish. All other fields lock once the
+  // event leaves the draft state.
   const canSubmit =
-    !isEditLocked &&
     title.trim().length > 1 &&
     startsAtLocal.length > 0 &&
     capacity > 0 &&
@@ -156,8 +158,9 @@ export function EventForm(props: EventFormProps) {
               Questo evento non è più una bozza.
             </p>
             <p className="text-xs text-amber-900/80">
-              Una volta pubblicato non si può più modificare. Se devi correggere
-              qualcosa, archivia questo evento e creane uno nuovo.
+              Puoi ancora modificare la <strong>capienza</strong>. Gli altri
+              dettagli (titolo, data, prezzo, slug) non sono più modificabili:
+              per cambiarli, archivia questo evento e creane uno nuovo.
             </p>
           </CardContent>
         </Card>
@@ -219,7 +222,6 @@ export function EventForm(props: EventFormProps) {
                 min={1}
                 value={capacity}
                 onChange={(e) => setCapacity(Number(e.target.value) || 0)}
-                disabled={isEditLocked}
                 required
               />
             }

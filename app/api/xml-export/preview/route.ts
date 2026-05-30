@@ -4,14 +4,13 @@ import { buildInvoiceXml } from "@/modules/xml-export";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { getServiceClient } from "@/server/supabase";
 import { loadBookingsForExport, mapToInvoiceInput } from "@/server/xml-export";
-import { invoiceYearFor } from "@/server/xml-export";
 
 /**
  * GET /api/xml-export/preview?bookingId=...
  *
  * Returns the XML that WOULD be generated for `bookingId`, without
  * persisting anything: no `xml_exports` row, no counter increment, no
- * email. The invoice number is a placeholder ("YYYY/PREVIEW") so the
+ * email. The invoice number is a placeholder ("PREVIEW/L") so the
  * admin can spot it in the preview and avoid confusion with real
  * progressives.
  *
@@ -47,11 +46,10 @@ export async function GET(request: Request): Promise<Response> {
 
   const row = rows[0];
   try {
-    const year = invoiceYearFor(row.paidAtIso);
     const invoice = buildInvoiceXml(
       mapToInvoiceInput({
         row,
-        invoiceNumber: `${year}/PREVIEW`,
+        invoiceNumber: `PREVIEW/L`,
         transmissionProgressive: "PREVIEW000",
       })
     );

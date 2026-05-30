@@ -43,20 +43,35 @@ export default async function EventDetailPage({
   const counters = await getEventCounters(event.id);
   const eventRequests = await listRequestsForEvent(event.id);
   const requestItems = eventRequests.map(toRequestListItem);
-  const availableSeats = Math.max(0, event.capacity - counters.bookingsPaid);
+  const availableSeats = Math.max(0, event.capacity - counters.paidPeople);
   const status = event.status as EventStatus;
   const isDraft = status === "draft";
   const isArchived = status === "archived";
 
   const embedUrl = `${getAppBaseUrl()}/embed/${event.slug}`;
+  const embedOrigin = new URL(embedUrl).origin;
+  const iframeId = `cooker-loft-${event.slug}`;
   const iframeCode = `<iframe
+  id="${iframeId}"
   src="${embedUrl}"
   title="${event.title} — Prenota"
   width="100%"
-  height="900"
-  style="border:0;max-width:680px;width:100%"
+  height="720"
+  scrolling="no"
+  style="border:0;width:100%;max-width:680px;display:block;margin:0 auto;overflow:hidden"
   loading="lazy">
-</iframe>`;
+</iframe>
+<script>
+  window.addEventListener("message", function (e) {
+    if (e.origin !== "${embedOrigin}") return;
+    var d = e.data;
+    if (!d || d.type !== "cooker-loft-embed:height") return;
+    var f = document.getElementById("${iframeId}");
+    if (f && f.contentWindow === e.source) {
+      f.style.height = d.height + "px";
+    }
+  });
+</script>`;
 
   return (
     <>
@@ -70,11 +85,11 @@ export default async function EventDetailPage({
         ]}
         actions={
           <div className="flex flex-wrap gap-2">
-            {isDraft ? (
+            {!isArchived ? (
               <Button asChild variant="outline">
                 <Link href={`/admin/events/${event.id}/edit`}>
                   <Pencil className="h-4 w-4" />
-                  Modifica
+                  {isDraft ? "Modifica" : "Modifica capienza"}
                 </Link>
               </Button>
             ) : null}
@@ -107,9 +122,10 @@ export default async function EventDetailPage({
       ) : (
         <Card className="border-slate-300 bg-slate-50/60">
           <CardContent className="p-4 text-sm">
-            <p className="font-medium">Evento pubblicato — non modificabile.</p>
+            <p className="font-medium">Evento pubblicato.</p>
             <p className="text-xs text-muted-foreground">
-              Per cambiare prezzo, data, capienza o descrizione, archivia
+              Puoi ancora modificare la capienza (con &quot;Modifica
+              capienza&quot;). Per cambiare prezzo, data o descrizione, archivia
               questo evento e creane uno nuovo.
             </p>
           </CardContent>

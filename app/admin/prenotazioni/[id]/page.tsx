@@ -4,11 +4,14 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CalendarDays,
+  CheckCircle2,
   CreditCard,
   Info,
   Mail,
+  MinusCircle,
   Phone,
   Users,
+  XCircle,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -327,21 +330,42 @@ export default async function PrenotazioneDetailPage({
         </Card>
       ) : null}
 
-      {booking?.consents ? (
-        <ConsentsCard consents={booking.consents as ConsentsJson} />
-      ) : null}
+      <ConsentsCard request={request} consents={booking?.consents as ConsentsJson | null} />
     </>
   );
 }
 
+type RequestConsents = {
+  consent_terms_accepted: boolean;
+  consent_terms_accepted_at: string | null;
+  consent_terms_version: string | null;
+  consent_privacy_accepted: boolean;
+  consent_privacy_accepted_at: string | null;
+  consent_privacy_version: string | null;
+  consent_health_accepted: boolean;
+  consent_health_accepted_at: string | null;
+  consent_health_version: string | null;
+};
+
 type ConsentsJson = {
   completed_at?: string;
+  terms_accepted_at?: string | null;
+  privacy_accepted_at?: string | null;
+  health_accepted_at?: string | null;
   image_use_choice?: "accept" | "decline";
+  versions?: {
+    terms?: string;
+    privacy?: string;
+    health?: string;
+    image_use?: string;
+    clauses_1341_1342?: string;
+  };
   participants?: {
     kind?: "only_me" | "with_others";
     other_participants_names?: string | null;
     allergies_present?: "yes" | "no";
     allergies_details?: string | null;
+    consent_allergies_declaration_at?: string | null;
     consent_representative_at?: string | null;
     consent_inform_others_at?: string | null;
   };
@@ -356,7 +380,184 @@ type ConsentsJson = {
   };
 };
 
-function ConsentsCard({ consents }: { consents: ConsentsJson }) {
+/**
+ * One consent line. `given`:
+ *   true  → granted (green check)
+ *   false → not granted: red X if required, muted dash if optional
+ *   null  → not applicable to this booking
+ */
+function ConsentRow({
+  label,
+  given,
+  optional,
+  detail,
+}: {
+  label: string;
+  given: boolean | null;
+  optional?: boolean;
+  detail?: string | null;
+}) {
+  let icon: React.ReactNode;
+  let statusText: string;
+  let statusClass: string;
+  if (given === null) {
+    icon = <MinusCircle className="h-4 w-4 text-muted-foreground" />;
+    statusText = "Non applicabile";
+    statusClass = "text-muted-foreground";
+  } else if (given) {
+    icon = <CheckCircle2 className="h-4 w-4 text-emerald-600" />;
+    statusText = "Concesso";
+    statusClass = "text-emerald-700";
+  } else if (optional) {
+    icon = <MinusCircle className="h-4 w-4 text-muted-foreground" />;
+    statusText = "Non concesso (facoltativo)";
+    statusClass = "text-muted-foreground";
+  } else {
+    icon = <XCircle className="h-4 w-4 text-rose-600" />;
+    statusText = "Mancante";
+    statusClass = "text-rose-700";
+  }
+  return (
+    <div className="flex items-start gap-2 rounded-md border bg-card px-3 py-2">
+      <span className="mt-0.5 shrink-0">{icon}</span>
+      <div className="min-w-0 space-y-0.5">
+        <p className="text-sm leading-snug">{label}</p>
+        <p className={`text-[11px] font-medium ${statusClass}`}>{statusText}</p>
+        {detail ? (
+          <p className="text-[11px] text-muted-foreground">{detail}</p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function ConsentsCard({
+  request,
+  consents,
+}: {
+  request: RequestConsents;
+  consents: ConsentsJson | null;
+}) {
+  const p = consents?.participants;
+  const m = consents?.minors;
+  const multi = p?.kind === "with_others";
+  const minorsIncluded = m?.included === "yes";
+  const v = consents?.versions;
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Consensi raccolti</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Riepilogo di quali consensi sono stati dati e quali no.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Al momento della richiesta
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <ConsentRow
+                label="Termini e condizioni (richiesta)"
+                given={request.consent_terms_accepted}
+                detail={
+                  request.consent_terms_accepted_at
+                    ? `${formatDateTime(request.consent_terms_accepted_at)}${request.consent_terms_version ? ` · v. ${request.consent_terms_version}` : ""}`
+                    : null
+                }
+              />
+              <ConsentRow
+                label="Informativa privacy (richiesta)"
+                given={request.consent_privacy_accepted}
+                detail={
+                  request.consent_privacy_accepted_at
+                    ? `${formatDateTime(request.consent_privacy_accepted_at)}${request.consent_privacy_version ? ` · v. ${request.consent_privacy_version}` : ""}`
+                    : null
+                }
+              />
+              <ConsentRow
+                label="Dichiarazione esigenze alimentari (richiesta)"
+                given={request.consent_health_accepted}
+                detail={
+                  request.consent_health_accepted_at
+                    ? `${formatDateTime(request.consent_health_accepted_at)}${request.consent_health_version ? ` · v. ${request.consent_health_version}` : ""}`
+                    : null
+                }
+              />
+            </div>
+          </div>
+
+          {consents ? (
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Al completamento{" "}
+                {consents.completed_at
+                  ? `· ${formatDateTime(consents.completed_at)}`
+                  : ""}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <ConsentRow
+                  label="Condizioni generali di partecipazione"
+                  given={Boolean(consents.terms_accepted_at)}
+                  detail={v?.terms ? `v. ${v.terms}` : null}
+                />
+                <ConsentRow
+                  label="Approvazione specifica clausole 1341/1342 c.c."
+                  given={Boolean(v?.clauses_1341_1342)}
+                  detail={v?.clauses_1341_1342 ? `v. ${v.clauses_1341_1342}` : null}
+                />
+                <ConsentRow
+                  label="Informativa privacy"
+                  given={Boolean(consents.privacy_accepted_at)}
+                  detail={v?.privacy ? `v. ${v.privacy}` : null}
+                />
+                <ConsentRow
+                  label="Dichiarazione allergie / esigenze alimentari"
+                  given={Boolean(p?.consent_allergies_declaration_at)}
+                />
+                <ConsentRow
+                  label="Conferma ruolo di referente"
+                  given={multi ? Boolean(p?.consent_representative_at) : null}
+                />
+                <ConsentRow
+                  label="Impegno a informare gli altri partecipanti"
+                  given={multi ? Boolean(p?.consent_inform_others_at) : null}
+                />
+                <ConsentRow
+                  label="Uso immagine del referente"
+                  given={consents.image_use_choice === "accept"}
+                  optional
+                />
+                <ConsentRow
+                  label="Responsabilità genitoriale sul minore"
+                  given={minorsIncluded ? Boolean(m?.consent_parental_at) : null}
+                />
+                <ConsentRow
+                  label="Uso immagine del minore"
+                  given={minorsIncluded ? Boolean(m?.consent_image_use_at) : null}
+                  optional
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="rounded-md bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              <Info className="mr-1 inline h-3 w-3" />
+              I consensi di completamento compariranno qui dopo che il cliente
+              avrà compilato il modulo di completamento.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {consents ? (
+        <ParticipantsCard consents={consents} />
+      ) : null}
+    </>
+  );
+}
+
+function ParticipantsCard({ consents }: { consents: ConsentsJson }) {
   const p = consents.participants;
   const m = consents.minors;
   const multi = p?.kind === "with_others";
@@ -365,7 +566,7 @@ function ConsentsCard({ consents }: { consents: ConsentsJson }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Partecipanti e consensi (raccolti al completamento)
+          Partecipanti (raccolti al completamento)
         </CardTitle>
         {consents.completed_at ? (
           <p className="text-xs text-muted-foreground">

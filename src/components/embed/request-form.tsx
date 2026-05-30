@@ -34,6 +34,29 @@ export type PublicEvent = {
   priceCents: number;
 };
 
+/** Public legal documents linked from the request consents. */
+const LEGAL_DOCS = {
+  termsBooking:
+    "https://loft.cookergirl.com/wp-content/uploads/2026/03/2026.03.20-COOKER-LOFT-TERMINI-E-CONDIZIONI-PER-LA-PRENOTAZIONE-DI-EVENTI.docx",
+  conditionsOfUse:
+    "https://loft.cookergirl.com/wp-content/uploads/2026/03/2026.03.20-CONDIZIONI-DI-UTILIZZO.docx",
+  privacy:
+    "https://loft.cookergirl.com/wp-content/uploads/2026/03/2026.03.20-ANIDRA-LOFT-informativa-iscrizione-evento-1.docx",
+} as const;
+
+function DocLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium underline underline-offset-2"
+    >
+      {children}
+    </a>
+  );
+}
+
 const initialState: SubmitRequestState = { status: "idle" };
 
 export function RequestForm({ event }: { event: PublicEvent }) {
@@ -190,10 +213,14 @@ function FormBody({
           label={
             <>
               Dichiaro di aver letto e accettato i{" "}
-              <a href="#" onClick={(e) => e.preventDefault()} className="underline underline-offset-2">
-                termini e le condizioni
-              </a>{" "}
-              relativi alla richiesta di prenotazione.
+              <DocLink href={LEGAL_DOCS.termsBooking}>
+                termini e le condizioni per la prenotazione di eventi
+              </DocLink>{" "}
+              e le{" "}
+              <DocLink href={LEGAL_DOCS.conditionsOfUse}>
+                condizioni di utilizzo
+              </DocLink>
+              .
             </>
           }
         />
@@ -205,9 +232,7 @@ function FormBody({
           label={
             <>
               Dichiaro di aver letto l&apos;
-              <a href="#" onClick={(e) => e.preventDefault()} className="underline underline-offset-2">
-                informativa privacy
-              </a>{" "}
+              <DocLink href={LEGAL_DOCS.privacy}>informativa privacy</DocLink>{" "}
               relativa alla richiesta di prenotazione.
             </>
           }

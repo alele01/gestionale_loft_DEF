@@ -29,7 +29,7 @@ export default async function EditEventPage({
         description={
           status === "draft"
             ? "Bozza modificabile. Puoi salvare e tornare a lavorarla, oppure pubblicarla dal dettaglio."
-            : "Questo evento è già pubblicato o archiviato e non si può più modificare."
+            : "Evento già pubblicato: puoi modificare solo la capienza. Gli altri dettagli non sono più modificabili."
         }
         crumbs={[
           { label: "Admin", href: "/admin/dashboard" },

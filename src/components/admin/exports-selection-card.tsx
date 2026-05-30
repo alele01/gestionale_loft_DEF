@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Eye, Send, Users } from "lucide-react";
+import { Eye, Search, Send, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PriceLabel } from "@/components/shared/price-label";
 import { formatDateTime, formatShortDate } from "@/lib/format";
@@ -56,6 +57,17 @@ export function SelectionExportCard({ bookings }: Props) {
   const [previewLoading, setPreviewLoading] = React.useState<string | null>(
     null
   );
+  const [query, setQuery] = React.useState("");
+
+  const visibleBookings = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return bookings;
+    return bookings.filter((b) => {
+      const haystack =
+        `${b.requester.firstName} ${b.requester.lastName} ${b.event.title}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [bookings, query]);
 
   const previewBooking = async (b: SelectableBooking) => {
     setPreviewLoading(b.id);
@@ -104,14 +116,20 @@ export function SelectionExportCard({ bookings }: Props) {
     .filter((b) => selected[b.id])
     .reduce((s, b) => s + (b.amountPaidCents ?? 0), 0);
 
+  const visibleSelectedCount = visibleBookings.filter(
+    (b) => selected[b.id]
+  ).length;
   const allSelected =
-    bookings.length > 0 && selectedCount === bookings.length;
-  const someSelected = selectedCount > 0 && !allSelected;
+    visibleBookings.length > 0 &&
+    visibleSelectedCount === visibleBookings.length;
+  const someSelected = visibleSelectedCount > 0 && !allSelected;
 
   const toggleAll = (v: boolean) => {
-    const next: Record<string, boolean> = {};
-    if (v) for (const b of bookings) next[b.id] = true;
-    setSelected(next);
+    setSelected((prev) => {
+      const next = { ...prev };
+      for (const b of visibleBookings) next[b.id] = v;
+      return next;
+    });
   };
 
   const send = async () => {
@@ -154,6 +172,18 @@ export function SelectionExportCard({ bookings }: Props) {
           </p>
         ) : (
           <>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cerca per nome o evento…"
+                className="pl-9"
+                aria-label="Cerca prenotazioni per nome o evento"
+              />
+            </div>
+
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -180,7 +210,17 @@ export function SelectionExportCard({ bookings }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.map((b) => {
+                  {visibleBookings.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="py-6 text-center text-sm text-muted-foreground"
+                      >
+                        Nessuna prenotazione trovata per &quot;{query}&quot;.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                  {visibleBookings.map((b) => {
                     const isCancelled = b.cancelledAfterPaymentAt !== null;
                     return (
                       <TableRow key={b.id}>
@@ -290,7 +330,7 @@ export function SelectionExportCard({ bookings }: Props) {
                   <>
                     <p className="text-xs text-muted-foreground">
                       Anteprima generata al volo. Il numero fattura è un
-                      placeholder ({`YYYY/PREVIEW`}); il valore reale viene
+                      placeholder ({`PREVIEW/L`}); il valore reale viene
                       assegnato al momento dell&apos;invio.
                     </p>
                     <pre className="max-h-80 overflow-auto rounded bg-slate-950 p-3 text-[11px] leading-tight text-slate-100">

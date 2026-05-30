@@ -123,7 +123,7 @@ export default async function AdminDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => {
               const c = event.counters;
-              const availableSeats = Math.max(0, event.capacity - c.bookingsPaid);
+              const availableSeats = Math.max(0, event.capacity - c.paidPeople);
               return (
                 <Card key={event.id} className="flex h-full flex-col">
                   <CardContent className="flex flex-1 flex-col gap-4 p-5">

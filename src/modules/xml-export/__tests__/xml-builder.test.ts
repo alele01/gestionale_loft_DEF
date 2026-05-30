@@ -6,6 +6,7 @@ import {
   buildFilename,
   escapeXml,
   formatRomeDate,
+  invoiceDocumentDate,
   sanitizeFatturaText,
 } from "../xml-builder";
 import { computeVatBreakdown } from "../breakdown";
@@ -247,6 +248,20 @@ describe("filename / helpers", () => {
     assert.equal(formatRomeDate("2026-05-23T22:30:00Z"), "2026-05-24");
     // 23 May 12:00 UTC = 23 May 14:00 Rome.
     assert.equal(formatRomeDate("2026-05-23T12:00:00Z"), "2026-05-23");
+  });
+
+  it("invoiceDocumentDate always returns the 28th of the payment month (Rome)", () => {
+    assert.equal(invoiceDocumentDate("2026-05-03T12:00:00Z"), "2026-05-28");
+    assert.equal(invoiceDocumentDate("2026-02-15T09:30:00Z"), "2026-02-28");
+    // Late-evening UTC on the last day of a month rolls into next month in Rome.
+    assert.equal(invoiceDocumentDate("2026-06-30T23:30:00Z"), "2026-07-28");
+  });
+
+  it("buildInvoiceXml dates the document on the 28th, not the payment day", () => {
+    const { content } = buildInvoiceXml(companyWithSdi);
+    const dataMatch = content.match(/<Data>(\d{4}-\d{2}-\d{2})<\/Data>/);
+    assert.ok(dataMatch, "expected a <Data> element");
+    assert.match(dataMatch![1], /-28$/);
   });
 });
 

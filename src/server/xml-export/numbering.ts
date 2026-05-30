@@ -7,10 +7,10 @@ import type { ServiceClient } from "@/server/supabase";
  * a PL/pgSQL function (`public.reserve_invoice_number`) so the counter
  * read-then-write is atomic under concurrent callers.
  *
- * Returns the user-facing string `"YYYY/NNNN"` ready to put inside
- * `<Numero>`. The number is zero-padded to 4 digits to match the
- * accountant's preferred shape (the V1 venue is far from exhausting 4
- * digits in a year).
+ * Returns the user-facing string used inside `<Numero>`. The venue uses a
+ * dedicated "Loft" sezionale, so the label is `"{N}/L"` (e.g. `1/L`,
+ * `2/L`, …). The progressive still resets each calendar year (the RPC
+ * tracks `year`), and the year itself is conveyed by the invoice date.
  */
 export async function reserveInvoiceNumber(
   client: ServiceClient,
@@ -31,7 +31,7 @@ export async function reserveInvoiceNumber(
   return {
     year: row.year,
     number: row.number,
-    label: `${row.year}/${row.number.toString().padStart(4, "0")}`,
+    label: `${row.number}/L`,
   };
 }
 

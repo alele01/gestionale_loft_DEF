@@ -202,7 +202,7 @@ function buildDatiGenerali(input: InvoiceInput): string {
     `<DatiGeneraliDocumento>` +
     `<TipoDocumento>TD01</TipoDocumento>` +
     `<Divisa>EUR</Divisa>` +
-    `<Data>${formatRomeDate(input.paidAtIso)}</Data>` +
+    `<Data>${invoiceDocumentDate(input.paidAtIso)}</Data>` +
     `<Numero>${escapeXml(input.invoiceNumber)}</Numero>` +
     `<ImportoTotaleDocumento>${formatCents2(input.grossAmountCents)}</ImportoTotaleDocumento>` +
     `</DatiGeneraliDocumento>` +
@@ -254,7 +254,9 @@ function buildDatiBeniServizi(
 }
 
 function buildDatiPagamento(input: InvoiceInput): string {
-  const paymentDate = formatRomeDate(input.paidAtIso);
+  // Align the payment-term reference/due dates to the document date (28th)
+  // so the invoice never shows a due date earlier than its issue date.
+  const paymentDate = invoiceDocumentDate(input.paidAtIso);
   const mode = input.paymentMode ?? "MP08";
   return (
     `<DatiPagamento>` +
@@ -334,4 +336,25 @@ export function formatRomeDate(iso: string): string {
   });
   // en-CA gives "YYYY-MM-DD" directly.
   return formatter.format(d);
+}
+
+/**
+ * Invoice document date (`<Data>` in DatiGeneraliDocumento). Per the
+ * venue's accounting policy the document is always dated the 28th of the
+ * month in which the booking was paid — never the actual payment day.
+ * The month/year are taken in `Europe/Rome` so the calendar boundary
+ * matches the accountant's.
+ */
+export function invoiceDocumentDate(paidAtIso: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date(paidAtIso));
+  const year = parts.find((p) => p.type === "year")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  if (!year || !month) {
+    throw new Error(`invoiceDocumentDate: cannot derive month from ${paidAtIso}`);
+  }
+  return `${year}-${month}-28`;
 }

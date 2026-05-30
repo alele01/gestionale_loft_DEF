@@ -345,8 +345,8 @@ function FormBody({
                 Se uno di questi dati non è corretto, non procedere.
               </p>
               <p className="text-xs text-amber-900/80">
-                Per modificare numero di persone o occasione speciale,
-                scrivici a{" "}
+                Per modificare numero di persone, occasione speciale o le
+                allergie segnalate, scrivici a{" "}
                 <a
                   className="inline-flex items-center gap-1 underline"
                   href={`mailto:${contactEmail}`}
@@ -357,6 +357,93 @@ function FormBody({
                 . Aggiorneremo noi i dati e ti rimanderemo un nuovo link.
               </p>
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Hidden inputs for the readonly allergies block. */}
+          <input
+            type="hidden"
+            name="allergiesPresent"
+            value={allergiesPresent}
+          />
+          <input
+            type="hidden"
+            name="allergiesDetails"
+            value={allergiesDetails}
+          />
+
+          <div className="space-y-2">
+            <Label>
+              Allergie, intolleranze o esigenze alimentari di{" "}
+              <strong>tutti i partecipanti</strong>, segnalate in fase di
+              richiesta
+            </Label>
+            {booking.dietaryNotes ? (
+              <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
+                <p className="font-semibold text-amber-900">
+                  Sì, segnalate per tutti i partecipanti inclusi nella
+                  prenotazione
+                </p>
+                <p className="whitespace-pre-line text-xs leading-relaxed text-amber-900/90">
+                  {booking.dietaryNotes}
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-md border bg-muted/40 p-3 text-sm">
+                <p className="font-semibold">
+                  Nessuna allergia segnalata per nessuno dei partecipanti
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  In fase di richiesta hai dichiarato che nessuno dei{" "}
+                  {people} {people === 1 ? "partecipante" : "partecipanti"}{" "}
+                  ha allergie, intolleranze o esigenze alimentari
+                  particolari da segnalare.
+                </p>
+              </div>
+            )}
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Queste informazioni si riferiscono a{" "}
+              <strong>tutti i partecipanti</strong> inclusi nella
+              prenotazione e corrispondono a quanto indicato in fase di
+              richiesta. Non sono modificabili qui:{" "}
+              <strong>
+                per modificarle, scrivi al team prima di procedere
+              </strong>
+              .
+            </p>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              La mancata, incompleta o tardiva comunicazione di allergie,
+              intolleranze o esigenze alimentari particolari potrebbe non
+              consentire ad Anidra S.r.l. e/o al catering incaricato di
+              valutare o predisporre eventuali adattamenti della proposta
+              gastronomica accessoria.
+            </p>
+
+            <ConsentCheckbox
+              id="consentAllergiesDeclaration"
+              name="consentAllergiesDeclaration"
+              checked={consentAllergiesDeclaration}
+              onChange={setConsentAllergiesDeclaration}
+              required
+              error={fieldErrors.consentAllergiesDeclaration}
+              label={
+                booking.dietaryNotes ? (
+                  <>
+                    Dichiaro che le allergie, intolleranze o esigenze
+                    alimentari particolari indicate sopra si riferiscono a{" "}
+                    <strong>tutti i partecipanti</strong> inclusi nella
+                    prenotazione, sono complete e veritiere
+                  </>
+                ) : (
+                  <>
+                    Dichiaro che <strong>nessuno</strong> dei partecipanti
+                    inclusi nella prenotazione ha allergie, intolleranze o
+                    esigenze alimentari particolari da segnalare
+                  </>
+                )
+              }
+            />
           </div>
         </CardContent>
       </Card>
@@ -610,18 +697,6 @@ function FormBody({
           <CardTitle className="text-base">Partecipanti</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Hidden inputs for the readonly allergies block. */}
-          <input
-            type="hidden"
-            name="allergiesPresent"
-            value={allergiesPresent}
-          />
-          <input
-            type="hidden"
-            name="allergiesDetails"
-            value={allergiesDetails}
-          />
-
           <div className="rounded-lg border bg-primary/5 p-4">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
@@ -677,81 +752,6 @@ function FormBody({
               </Field>
             </>
           ) : null}
-
-          <Separator />
-
-          <div className="space-y-2">
-            <Label>
-              Allergie, intolleranze o esigenze alimentari di{" "}
-              <strong>tutti i partecipanti</strong>, segnalate in fase di
-              richiesta
-            </Label>
-            {booking.dietaryNotes ? (
-              <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
-                <p className="font-semibold text-amber-900">
-                  Sì, segnalate per tutti i partecipanti inclusi nella
-                  prenotazione
-                </p>
-                <p className="whitespace-pre-line text-xs leading-relaxed text-amber-900/90">
-                  {booking.dietaryNotes}
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-md border bg-muted/40 p-3 text-sm">
-                <p className="font-semibold">
-                  Nessuna allergia segnalata per nessuno dei partecipanti
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  In fase di richiesta hai dichiarato che nessuno dei{" "}
-                  {people} {people === 1 ? "partecipante" : "partecipanti"}{" "}
-                  ha allergie, intolleranze o esigenze alimentari
-                  particolari da segnalare.
-                </p>
-              </div>
-            )}
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Queste informazioni si riferiscono a{" "}
-              <strong>tutti i partecipanti</strong> inclusi nella
-              prenotazione e corrispondono a quanto indicato in fase di
-              richiesta. Non sono modificabili qui:{" "}
-              <strong>
-                per modificarle, scrivi al team prima di procedere
-              </strong>
-              .
-            </p>
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              La mancata, incompleta o tardiva comunicazione di allergie,
-              intolleranze o esigenze alimentari particolari potrebbe non
-              consentire ad Anidra S.r.l. e/o al catering incaricato di
-              valutare o predisporre eventuali adattamenti della proposta
-              gastronomica accessoria.
-            </p>
-
-            <ConsentCheckbox
-              id="consentAllergiesDeclaration"
-              name="consentAllergiesDeclaration"
-              checked={consentAllergiesDeclaration}
-              onChange={setConsentAllergiesDeclaration}
-              required
-              error={fieldErrors.consentAllergiesDeclaration}
-              label={
-                booking.dietaryNotes ? (
-                  <>
-                    Dichiaro che le allergie, intolleranze o esigenze
-                    alimentari particolari indicate sopra si riferiscono a{" "}
-                    <strong>tutti i partecipanti</strong> inclusi nella
-                    prenotazione, sono complete e veritiere
-                  </>
-                ) : (
-                  <>
-                    Dichiaro che <strong>nessuno</strong> dei partecipanti
-                    inclusi nella prenotazione ha allergie, intolleranze o
-                    esigenze alimentari particolari da segnalare
-                  </>
-                )
-              }
-            />
-          </div>
         </CardContent>
       </Card>
 

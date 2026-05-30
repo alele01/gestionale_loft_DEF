@@ -2,9 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CalendarDays, Check, ChevronsUpDown, Mail, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  ChevronsUpDown,
+  Mail,
+  Search,
+  Users,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -49,15 +57,23 @@ export function RequestsBoard({
 }: RequestsBoardProps) {
   const [statusFilter, setStatusFilter] = React.useState<StatusFilter>("all");
   const [eventFilter, setEventFilter] = React.useState<EventFilter>("all");
+  const [query, setQuery] = React.useState("");
 
-  // Narrow by event first, so the status pill counts reflect the event subset.
-  const eventScoped = React.useMemo(
-    () =>
+  // Narrow by event first, then by free-text search (name / email), so the
+  // status pill counts reflect the currently visible subset.
+  const eventScoped = React.useMemo(() => {
+    const byEvent =
       eventFilter === "all"
         ? items
-        : items.filter((it) => it.eventId === eventFilter),
-    [items, eventFilter]
-  );
+        : items.filter((it) => it.eventId === eventFilter);
+    const q = query.trim().toLowerCase();
+    if (!q) return byEvent;
+    return byEvent.filter((it) => {
+      const haystack =
+        `${it.firstName} ${it.lastName} ${it.email}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [items, eventFilter, query]);
 
   const countByStatus = React.useMemo(() => {
     const acc = {} as Record<UnifiedStatus, number>;
@@ -100,6 +116,17 @@ export function RequestsBoard({
 
   return (
     <div className="space-y-4">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Cerca per nome o email…"
+          className="pl-9"
+          aria-label="Cerca prenotazioni per nome o email"
+        />
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <FilterPill
           active={statusFilter === "all"}
