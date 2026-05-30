@@ -1,11 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -124,11 +121,6 @@ function NotFoundView() {
           Verifica di aver aperto l&apos;email più recente.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">Torna al sito</Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }
@@ -144,14 +136,6 @@ function NotAvailableView() {
           altrimenti contatta lo staff.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">
-            Torna al sito
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }
@@ -169,11 +153,6 @@ function CancelledView() {
           errore, contatta lo staff.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">Torna al sito</Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }
@@ -188,11 +167,6 @@ function TooManyRequestsView() {
           istante e riprova.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">Torna al sito</Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }
@@ -207,11 +181,6 @@ function GenericErrorView() {
           qualche minuto, oppure contatta lo staff se il problema persiste.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">Torna al sito</Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { XCircle, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -54,11 +53,6 @@ export default async function PaymentCancelPage(props: {
             tua email per il riepilogo.
           </p>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link href="/">Torna al sito</Link>
-          </Button>
-        </CardContent>
       </Card>
     );
   }
@@ -72,11 +66,6 @@ export default async function PaymentCancelPage(props: {
             ricevuto un link aggiornato via email, usa quello.
           </p>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link href="/">Torna al sito</Link>
-          </Button>
-        </CardContent>
       </Card>
     );
   }
@@ -147,11 +136,6 @@ function NotFoundView() {
           tua email per il link più aggiornato.
         </p>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <Button asChild variant="outline">
-          <Link href="/">Torna al sito</Link>
-        </Button>
-      </CardContent>
     </Card>
   );
 }

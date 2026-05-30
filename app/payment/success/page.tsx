@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -151,11 +149,6 @@ function PaidView({
             ) : null}
           </div>
         ) : null}
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link href="/">Torna al sito</Link>
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
@@ -173,11 +166,6 @@ function UnknownState({ reason }: { reason: string }) {
       </CardHeader>
       <CardContent className="space-y-2 text-xs text-muted-foreground">
         <p className="font-mono text-[10px]">stato: {reason}</p>
-        <div className="flex justify-center pt-2">
-          <Button asChild variant="outline">
-            <Link href="/">Torna al sito</Link>
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

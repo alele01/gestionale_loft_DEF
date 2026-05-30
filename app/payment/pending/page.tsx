@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Clock, ShieldCheck } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 import { getVenueContactEmail } from "@/server/env";
 
@@ -63,11 +61,6 @@ export default function PaymentPendingPage() {
               </a>
               .
             </p>
-            <div className="pt-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/">Torna al sito</Link>
-              </Button>
-            </div>
           </CardContent>
         </Card>
     </div>
