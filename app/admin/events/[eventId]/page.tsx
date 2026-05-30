@@ -20,7 +20,7 @@ import { DataField } from "@/components/shared/data-field";
 import { formatDateTime } from "@/lib/format";
 import { toRequestListItem } from "@/lib/request-list";
 import { requireAdmin } from "@/server/auth/require-admin";
-import { serverEnv } from "@/server/env";
+import { getAppBaseUrl } from "@/server/env";
 import {
   getEventById,
   getEventCounters,
@@ -48,7 +48,7 @@ export default async function EventDetailPage({
   const isDraft = status === "draft";
   const isArchived = status === "archived";
 
-  const embedUrl = `${serverEnv.APP_BASE_URL}/embed/${event.slug}`;
+  const embedUrl = `${getAppBaseUrl()}/embed/${event.slug}`;
   const iframeCode = `<iframe
   src="${embedUrl}"
   title="${event.title} — Prenota"
