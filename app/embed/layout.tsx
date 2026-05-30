@@ -21,10 +21,15 @@ export default function EmbedLayout({
       */}
       <style>{`html,body{background:transparent !important;}`}</style>
       <EmbedAutoResize />
+      {/*
+        Flush, padding-free shell. The embedded (compact) form sits directly
+        on the host page; the direct-link request page paints its own warm
+        full-screen background + padding via its internal PageShell.
+      */}
       <div
-        className={`cooker-brand bg-transparent py-2 text-foreground ${brandFont.className}`}
+        className={`cooker-brand bg-transparent text-foreground ${brandFont.className}`}
       >
-        <div className="w-full">{children}</div>
+        {children}
       </div>
     </>
   );

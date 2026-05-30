@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { CalendarDays, CheckCircle2, ChefHat, Sparkles } from "lucide-react";
+import { CalendarDays, CheckCircle2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,19 +74,19 @@ export function RequestForm({
 
   if (compact) {
     return (
-      <div>
+      <div className="px-1 py-2">
         <FormBody event={event} action={formAction} state={state} compact />
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
+    <PageShell>
       <BrandHeader subtitle="Richiesta di prenotazione" />
       <EventHeader event={event} />
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Richiedi un posto</CardTitle>
+      <Card className="cl-card">
+        <CardHeader className="space-y-1.5">
+          <CardTitle className="cl-card-title">Richiedi un posto</CardTitle>
           <p className="text-sm text-muted-foreground">
             Compila i dati e attendi conferma. Riceverai un&apos;email appena
             la richiesta sarà gestita.
@@ -97,6 +97,20 @@ export function RequestForm({
         </CardContent>
       </Card>
       <Footer />
+    </PageShell>
+  );
+}
+
+/**
+ * Full-page warm shell for the *direct link* surface (non-embedded).
+ * The embed layout itself is transparent/flush (for iframes), so the
+ * direct request page paints its own gradient background, centering and
+ * max-width here.
+ */
+function PageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="cl-page min-h-screen bg-gradient-to-b from-[#fffaf7] to-[#fde5d4] px-4 py-8 sm:px-6 sm:py-12">
+      <div className="mx-auto w-full max-w-xl space-y-5">{children}</div>
     </div>
   );
 }
@@ -342,33 +356,28 @@ function SubmitButton({
 
 function EventHeader({ event }: { event: PublicEvent }) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <ChefHat className="h-5 w-5" />
-          </div>
-          <div className="space-y-1">
-            <Badge variant="outline" className="text-[10px]">
-              <Sparkles className="h-3 w-3" />
-              Evento Cooker Loft
-            </Badge>
-            <CardTitle className="text-lg leading-tight">{event.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              <CalendarDays className="mr-1 inline h-3.5 w-3.5" />
-              {formatDateTime(event.startsAt)}
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <Card className="cl-card overflow-hidden">
+      <div className="cl-event-hero px-6 py-6 text-white">
+        <Badge className="cl-event-badge mb-2 border-0 bg-white/20 text-[10px] text-white">
+          <Sparkles className="h-3 w-3" />
+          Evento Cooker Loft
+        </Badge>
+        <h1 className="text-2xl font-bold leading-tight">{event.title}</h1>
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/90">
+          <CalendarDays className="h-4 w-4" />
+          {formatDateTime(event.startsAt)}
+        </p>
+      </div>
+      <CardContent className="space-y-3 pt-5">
         {event.description ? (
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-sm leading-relaxed text-foreground/80">
             {event.description}
           </p>
         ) : null}
-        <div className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2">
-          <span className="text-xs text-muted-foreground">Prezzo per persona</span>
+        <div className="flex items-center justify-between rounded-md border border-[rgba(120,66,63,0.12)] bg-[#fff7f1] px-4 py-3">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-[#78423f]">
+            Prezzo per persona
+          </span>
           <PriceLabel cents={event.priceCents} size="sm" />
         </div>
       </CardContent>
@@ -385,10 +394,11 @@ function SuccessState({
   people: number;
   compact?: boolean;
 }) {
+  const Wrapper = compact ? CompactWrapper : PageShell;
   return (
-    <div className="space-y-5">
+    <Wrapper>
       {!compact && <BrandHeader subtitle="Richiesta di prenotazione" />}
-      <Card className="border-primary/30 bg-secondary/50">
+      <Card className="cl-card border-primary/30 bg-secondary/50">
       <CardContent className="space-y-4 p-6 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <CheckCircle2 className="h-6 w-6" />
@@ -419,8 +429,13 @@ function SuccessState({
         </div>
       </CardContent>
       </Card>
-    </div>
+    </Wrapper>
   );
+}
+
+/** Passthrough wrapper used for the embed (compact) success state. */
+function CompactWrapper({ children }: { children: React.ReactNode }) {
+  return <div className="px-1 py-2">{children}</div>;
 }
 
 function Field({
