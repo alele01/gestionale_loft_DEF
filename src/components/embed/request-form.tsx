@@ -59,17 +59,23 @@ function DocLink({ href, children }: { href: string; children: React.ReactNode }
 
 const initialState: SubmitRequestState = { status: "idle" };
 
-export function RequestForm({ event }: { event: PublicEvent }) {
+export function RequestForm({
+  event,
+  compact = false,
+}: {
+  event: PublicEvent;
+  compact?: boolean;
+}) {
   const [state, formAction] = useActionState(submitRequestAction, initialState);
 
   if (state.status === "ok") {
-    return <SuccessState event={event} people={state.people} />;
+    return <SuccessState event={event} people={state.people} compact={compact} />;
   }
 
   return (
     <div className="space-y-5">
-      <BrandHeader subtitle="Richiesta di prenotazione" />
-      <EventHeader event={event} />
+      {!compact && <BrandHeader subtitle="Richiesta di prenotazione" />}
+      {!compact && <EventHeader event={event} />}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Richiedi un posto</CardTitle>
@@ -331,13 +337,15 @@ function EventHeader({ event }: { event: PublicEvent }) {
 function SuccessState({
   event,
   people,
+  compact = false,
 }: {
   event: PublicEvent;
   people: number;
+  compact?: boolean;
 }) {
   return (
     <div className="space-y-5">
-      <BrandHeader subtitle="Richiesta di prenotazione" />
+      {!compact && <BrandHeader subtitle="Richiesta di prenotazione" />}
       <Card className="border-primary/30 bg-secondary/50">
       <CardContent className="space-y-4 p-6 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">

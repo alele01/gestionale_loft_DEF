@@ -49,11 +49,12 @@ export default async function EventDetailPage({
   const isArchived = status === "archived";
 
   const embedUrl = `${getAppBaseUrl()}/embed/${event.slug}`;
+  const iframeSrc = `${embedUrl}?embed=1`;
   const embedOrigin = new URL(embedUrl).origin;
   const iframeId = `cooker-loft-${event.slug}`;
   const iframeCode = `<iframe
   id="${iframeId}"
-  src="${embedUrl}"
+  src="${iframeSrc}"
   title="${event.title} — Prenota"
   width="100%"
   height="720"
