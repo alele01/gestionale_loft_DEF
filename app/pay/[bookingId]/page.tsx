@@ -135,7 +135,7 @@ function NotFoundView() {
 
 function NotAvailableView() {
   return (
-    <Card className="border-emerald-300 bg-white">
+    <Card className="border-primary/30 bg-white">
       <CardHeader className="space-y-2 text-center">
         <CardTitle className="text-xl">Pagamento non più in sospeso</CardTitle>
         <p className="text-sm text-muted-foreground">

@@ -25,8 +25,7 @@ export const metadata: Metadata = {
 export default function PaymentPendingPage() {
   const contact = getVenueContactEmail();
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100 px-4 py-10">
-      <div className="mx-auto w-full max-w-xl space-y-5">
+    <div className="space-y-5">
         <Card>
           <CardHeader>
             <div className="flex items-start gap-3">
@@ -71,7 +70,6 @@ export default function PaymentPendingPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

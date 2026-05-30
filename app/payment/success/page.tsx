@@ -111,9 +111,9 @@ function PaidView({
 }) {
   const event = booking.events;
   return (
-    <Card className="border-emerald-300 bg-white">
+    <Card className="border-primary/30 bg-white">
       <CardHeader className="space-y-3 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <CheckCircle2 className="h-6 w-6" />
         </div>
         <CardTitle className="text-xl">Pagamento confermato</CardTitle>

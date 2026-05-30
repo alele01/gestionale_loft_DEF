@@ -46,7 +46,7 @@ export default async function PaymentCancelPage(props: {
   // Edge cases where the cancel page is no longer the right surface:
   if (booking.status === "paid") {
     return (
-      <Card className="border-emerald-300 bg-white">
+      <Card className="border-primary/30 bg-white">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-xl">Pagamento già confermato</CardTitle>
           <p className="text-sm text-muted-foreground">

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { brandFont } from "@/lib/brand-font";
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
@@ -10,7 +12,9 @@ export default function CompleteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100 px-4 py-6 sm:px-6 sm:py-10">
+    <div
+      className={`cooker-brand min-h-screen bg-gradient-to-b from-[#fffaf7] to-[#fde5d4] px-4 py-6 text-foreground sm:px-6 sm:py-10 ${brandFont.className}`}
+    >
       <div className="mx-auto w-full max-w-2xl">{children}</div>
     </div>
   );

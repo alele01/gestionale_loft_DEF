@@ -30,6 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
+import { BrandHeader } from "@/components/brand/brand-header";
 import { PriceLabel } from "@/components/shared/price-label";
 import { LegalAccordion } from "./legal-accordion";
 import { PrivacyToggleCheckbox } from "./privacy-toggle";
@@ -276,6 +277,8 @@ function FormBody({
         name="participantsKind"
         value={participantsKind}
       />
+
+      <BrandHeader subtitle="Completa la prenotazione" />
 
       <p className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
         I campi e le caselle contrassegnati con{" "}

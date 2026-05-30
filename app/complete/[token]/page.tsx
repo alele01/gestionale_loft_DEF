@@ -1,6 +1,7 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { BrandHeader } from "@/components/brand/brand-header";
 import { CompletionForm } from "@/components/complete/completion-form";
 import { getVenueContactEmail } from "@/server/env";
 import { lookupCompletion } from "@/server/completion/token";
@@ -27,33 +28,39 @@ export default async function CompletionPage({
 
   if (lookup.state === "already_paid") {
     return (
-      <Card className="border-emerald-300 bg-emerald-50/40">
-        <CardContent className="space-y-3 p-6">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-emerald-700" />
-            <h1 className="text-lg font-semibold">Prenotazione già pagata</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Questa prenotazione risulta già <strong>pagata</strong>. Hai
-            ricevuto via email la conferma con il riepilogo.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-5">
+        <BrandHeader subtitle="Completa la prenotazione" />
+        <Card className="border-primary/30 bg-secondary/50">
+          <CardContent className="space-y-3 p-6">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+              <h1 className="text-lg font-semibold">Prenotazione già pagata</h1>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Questa prenotazione risulta già <strong>pagata</strong>. Hai
+              ricevuto via email la conferma con il riepilogo.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   if (lookup.state === "already_completed") {
     return (
-      <Card>
-        <CardContent className="space-y-3 p-6">
-          <h1 className="text-lg font-semibold">Link già utilizzato</h1>
-          <p className="text-sm text-muted-foreground">
-            Questa prenotazione è già stata completata ed è in attesa di
-            pagamento. Controlla la nostra ultima email per il link al
-            pagamento, o scrivi allo staff.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-5">
+        <BrandHeader subtitle="Completa la prenotazione" />
+        <Card>
+          <CardContent className="space-y-3 p-6">
+            <h1 className="text-lg font-semibold">Link già utilizzato</h1>
+            <p className="text-sm text-muted-foreground">
+              Questa prenotazione è già stata completata ed è in attesa di
+              pagamento. Controlla la nostra ultima email per il link al
+              pagamento, o scrivi allo staff.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -80,7 +87,9 @@ export default async function CompletionPage({
 
 function InvalidTokenView({ reason }: { reason?: string }) {
   return (
-    <Card>
+    <div className="space-y-5">
+      <BrandHeader subtitle="Completa la prenotazione" />
+      <Card>
       <CardContent className="space-y-4 p-6">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-800">
@@ -105,6 +114,7 @@ function InvalidTokenView({ reason }: { reason?: string }) {
           </div>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }

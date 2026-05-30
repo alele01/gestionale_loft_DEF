@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BrandHeader } from "@/components/brand/brand-header";
 import { PriceLabel } from "@/components/shared/price-label";
 import { formatDateTime } from "@/lib/format";
 import {
@@ -44,6 +45,7 @@ export function RequestForm({ event }: { event: PublicEvent }) {
 
   return (
     <div className="space-y-5">
+      <BrandHeader subtitle="Richiesta di prenotazione" />
       <EventHeader event={event} />
       <Card>
         <CardHeader>
@@ -309,9 +311,11 @@ function SuccessState({
   people: number;
 }) {
   return (
-    <Card className="border-emerald-300 bg-emerald-50/40">
+    <div className="space-y-5">
+      <BrandHeader subtitle="Richiesta di prenotazione" />
+      <Card className="border-primary/30 bg-secondary/50">
       <CardContent className="space-y-4 p-6 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <CheckCircle2 className="h-6 w-6" />
         </div>
         <div className="space-y-1">
@@ -339,7 +343,8 @@ function SuccessState({
           </ol>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }
 

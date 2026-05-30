@@ -91,24 +91,24 @@ export function E6PaymentConfirmation({
 }
 
 const fiscalRecapStyle: React.CSSProperties = {
-  backgroundColor: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  borderRadius: "10px",
+  backgroundColor: "#fdf3ec",
+  border: "1px solid #f0ddcf",
+  borderRadius: "8px",
   margin: "16px 0",
   padding: "16px",
 };
 
 const fiscalLabelStyle: React.CSSProperties = {
-  color: "#64748b",
+  color: "#78423F",
   fontSize: "11px",
-  fontWeight: 600,
+  fontWeight: 700,
   letterSpacing: "0.05em",
   margin: "8px 0 2px 0",
   textTransform: "uppercase",
 };
 
 const fiscalValueStyle: React.CSSProperties = {
-  color: "#0f172a",
+  color: "#2f1e1a",
   fontSize: "15px",
   fontWeight: 600,
   lineHeight: "1.4",

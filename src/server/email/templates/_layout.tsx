@@ -6,13 +6,14 @@ import {
   Head,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
 import * as React from "react";
 
-import { getVenueContactEmail } from "@/server/env";
+import { getAppBaseUrl, getVenueContactEmail } from "@/server/env";
 
 export type EmailLayoutProps = {
   /** Short snippet shown in mail clients before the body opens. */
@@ -29,6 +30,7 @@ export type EmailLayoutProps = {
  */
 export function EmailLayout({ preview, children }: EmailLayoutProps) {
   const contact = getVenueContactEmail();
+  const logoUrl = `${getAppBaseUrl()}/brand/cooker-loft-logo.png`;
   return (
     <Html lang="it">
       <Head />
@@ -36,7 +38,12 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           <Section style={headerStyle}>
-            <Text style={headerTitleStyle}>Cooker Loft</Text>
+            <Img
+              src={logoUrl}
+              alt="Cooker Loft"
+              height={38}
+              style={logoStyle}
+            />
           </Section>
 
           <Section style={contentStyle}>{children}</Section>
@@ -64,45 +71,46 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
 }
 
 const bodyStyle: React.CSSProperties = {
-  backgroundColor: "#f6f7f9",
+  backgroundColor: "#fff7f1",
   fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
   margin: 0,
   padding: "24px 0",
 };
 
 const containerStyle: React.CSSProperties = {
   backgroundColor: "#ffffff",
-  borderRadius: "12px",
+  border: "1px solid #f0ddcf",
+  borderRadius: "10px",
   margin: "0 auto",
   maxWidth: "560px",
   padding: "0",
-  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
+  boxShadow: "0 10px 28px rgba(120, 66, 63, 0.08)",
+  overflow: "hidden",
 };
 
 const headerStyle: React.CSSProperties = {
-  borderBottom: "1px solid #e5e7eb",
+  backgroundColor: "#ffffff",
+  borderBottom: "1px solid #f0ddcf",
   padding: "20px 28px",
+  textAlign: "center",
 };
 
-const headerTitleStyle: React.CSSProperties = {
-  color: "#0f172a",
-  fontSize: "18px",
-  fontWeight: 700,
-  letterSpacing: "0.04em",
-  margin: 0,
-  textTransform: "uppercase",
+const logoStyle: React.CSSProperties = {
+  display: "inline-block",
+  height: "38px",
+  width: "auto",
 };
 
 const contentStyle: React.CSSProperties = {
-  color: "#0f172a",
+  color: "#2f1e1a",
   fontSize: "15px",
   lineHeight: "1.55",
   padding: "24px 28px 8px 28px",
 };
 
 const hrStyle: React.CSSProperties = {
-  borderColor: "#e5e7eb",
+  borderColor: "#f0ddcf",
   margin: "12px 28px 0 28px",
 };
 
@@ -111,20 +119,20 @@ const footerStyle: React.CSSProperties = {
 };
 
 const footerTextStyle: React.CSSProperties = {
-  color: "#334155",
+  color: "#78423F",
   fontSize: "13px",
   lineHeight: "1.5",
   margin: "8px 0",
 };
 
 const footerMutedStyle: React.CSSProperties = {
-  color: "#94a3b8",
+  color: "#a78a7e",
   fontSize: "12px",
   lineHeight: "1.5",
   margin: "8px 0 0 0",
 };
 
 const linkStyle: React.CSSProperties = {
-  color: "#2563eb",
+  color: "#AA2620",
   textDecoration: "underline",
 };

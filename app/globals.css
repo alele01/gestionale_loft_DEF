@@ -58,3 +58,44 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/*
+ * Cooker Loft customer-facing brand theme.
+ *
+ * Scoped to `.cooker-brand` so it only repaints the public surfaces
+ * (embed request form + completion form) and never the admin UI. Every
+ * shadcn component reads these CSS variables, so overriding them here
+ * rebrands buttons, cards, inputs, badges, radios and checkboxes at once.
+ *
+ * Palette extracted from the legacy single-event CSS:
+ *   accent       #AA2620   primary brick red
+ *   accent-dark  #78423F   warm brown (soft text / labels)
+ *   accent-soft  #ED7952   orange (gradients / accents)
+ *   bg-soft      #FDE5D4   cream (secondary / accent surfaces)
+ *   text         #2f1e1a   near-black warm brown
+ *   page bg      #fffaf7   warm white
+ */
+@layer base {
+  .cooker-brand {
+    --background: 24 100% 99%;
+    --foreground: 12 29% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 12 29% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 12 29% 14%;
+    --primary: 3 68% 40%;
+    --primary-foreground: 24 100% 98%;
+    --secondary: 25 88% 91%;
+    --secondary-foreground: 3 31% 36%;
+    --muted: 25 80% 95%;
+    --muted-foreground: 3 31% 36%;
+    --accent: 25 88% 91%;
+    --accent-foreground: 3 31% 36%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 24 100% 98%;
+    --border: 14 30% 88%;
+    --input: 14 32% 84%;
+    --ring: 3 68% 40%;
+    --radius: 0.375rem;
+  }
+}

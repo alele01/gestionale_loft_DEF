@@ -14,9 +14,9 @@ export function Heading({ children }: { children: React.ReactNode }) {
   return (
     <Text
       style={{
-        color: "#0f172a",
+        color: "#2f1e1a",
         fontSize: "22px",
-        fontWeight: 700,
+        fontWeight: 800,
         lineHeight: "1.3",
         margin: "0 0 16px 0",
       }}
@@ -30,7 +30,7 @@ export function Paragraph({ children }: { children: React.ReactNode }) {
   return (
     <Text
       style={{
-        color: "#0f172a",
+        color: "#2f1e1a",
         fontSize: "15px",
         lineHeight: "1.6",
         margin: "0 0 12px 0",
@@ -45,7 +45,7 @@ export function Muted({ children }: { children: React.ReactNode }) {
   return (
     <Text
       style={{
-        color: "#475569",
+        color: "#78423F",
         fontSize: "13px",
         lineHeight: "1.5",
         margin: "0 0 12px 0",
@@ -69,9 +69,9 @@ export function EventRecap({ data }: { data: EventRecapData }) {
   return (
     <Section
       style={{
-        backgroundColor: "#f8fafc",
-        border: "1px solid #e2e8f0",
-        borderRadius: "10px",
+        backgroundColor: "#fdf3ec",
+        border: "1px solid #f0ddcf",
+        borderRadius: "8px",
         margin: "16px 0",
         padding: "16px",
       }}
@@ -100,16 +100,16 @@ export function EventRecap({ data }: { data: EventRecapData }) {
 }
 
 const recapLabelStyle: React.CSSProperties = {
-  color: "#64748b",
+  color: "#78423F",
   fontSize: "11px",
-  fontWeight: 600,
+  fontWeight: 700,
   letterSpacing: "0.05em",
   margin: "8px 0 2px 0",
   textTransform: "uppercase",
 };
 
 const recapValueStyle: React.CSSProperties = {
-  color: "#0f172a",
+  color: "#2f1e1a",
   fontSize: "15px",
   fontWeight: 600,
   lineHeight: "1.4",
@@ -130,13 +130,14 @@ export function PrimaryButton({
       <Button
         href={href}
         style={{
-          backgroundColor: "#0f172a",
-          borderRadius: "8px",
+          backgroundColor: "#AA2620",
+          borderRadius: "6px",
           color: "#ffffff",
           display: "inline-block",
           fontSize: "15px",
-          fontWeight: 600,
-          padding: "12px 24px",
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          padding: "13px 26px",
           textDecoration: "none",
         }}
       >
@@ -152,8 +153,8 @@ export function InfoBlock({ children }: { children: React.ReactNode }) {
   return (
     <Section
       style={{
-        backgroundColor: "#eff6ff",
-        border: "1px solid #bfdbfe",
+        backgroundColor: "#fdf3ec",
+        border: "1px solid #f0ddcf",
         borderRadius: "8px",
         margin: "16px 0",
         padding: "12px 14px",
@@ -161,7 +162,7 @@ export function InfoBlock({ children }: { children: React.ReactNode }) {
     >
       <Text
         style={{
-          color: "#1e3a8a",
+          color: "#78423F",
           fontSize: "14px",
           lineHeight: "1.5",
           margin: 0,
@@ -177,8 +178,8 @@ export function WarningBlock({ children }: { children: React.ReactNode }) {
   return (
     <Section
       style={{
-        backgroundColor: "#fef3c7",
-        border: "1px solid #fcd34d",
+        backgroundColor: "#fde5d4",
+        border: "1px solid #ed7952",
         borderRadius: "8px",
         margin: "16px 0",
         padding: "12px 14px",
@@ -186,7 +187,7 @@ export function WarningBlock({ children }: { children: React.ReactNode }) {
     >
       <Text
         style={{
-          color: "#78350f",
+          color: "#78423F",
           fontSize: "14px",
           lineHeight: "1.5",
           margin: 0,

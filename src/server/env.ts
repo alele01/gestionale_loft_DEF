@@ -205,6 +205,15 @@ export function getVenueContactEmail(): string {
 }
 
 /**
+ * Public app base URL (no trailing slash). Used to build absolute links
+ * and asset URLs (e.g. the logo embedded in transactional emails, which
+ * must be absolute to render in mail clients).
+ */
+export function getAppBaseUrl(): string {
+  return loadServerEnv().APP_BASE_URL.replace(/\/+$/u, "");
+}
+
+/**
  * Returns the Resend API key asserting it is configured. Use this from
  * server-only Resend sender code; never from middleware / Edge.
  */
