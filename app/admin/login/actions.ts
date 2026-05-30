@@ -73,5 +73,9 @@ export async function signInAdminAction(
     };
   }
 
-  redirect(parsed.data.next ?? "/admin/dashboard");
+  // Password is only the first factor (aal1). Route to the 2FA step, which
+  // forwards to enrollment if no factor exists yet, or to the code challenge
+  // otherwise. requireAdmin enforces aal2 on every protected page anyway.
+  const next = parsed.data.next ?? "/admin/dashboard";
+  redirect(`/admin/2fa?next=${encodeURIComponent(next)}`);
 }

@@ -30,13 +30,21 @@ export type AdminIdentity = {
  *   2. A row in `public.admin_users` matching the user id with
  *      role='admin' must exist; otherwise the visitor is treated as
  *      unauthenticated, no matter how valid their Supabase session is.
+ *   3. Two-factor (TOTP) must be satisfied for the current session, i.e.
+ *      the Authenticator Assurance Level must be `aal2`. If the admin has
+ *      no factor enrolled yet → forced to `/admin/2fa/setup`; if a factor
+ *      exists but hasn't been verified this session → `/admin/2fa`.
+ *      Pass `{ skipMfa: true }` from the 2FA pages themselves to avoid a
+ *      redirect loop.
  *
  * The admin_users lookup uses the service-role client because RLS denies
  * any direct SELECT for the unauthenticated role and we want a uniform
  * lookup that does not depend on the SELECT policy mutating in future
  * phases.
  */
-export async function requireAdmin(): Promise<AdminIdentity> {
+export async function requireAdmin(
+  options?: { skipMfa?: boolean }
+): Promise<AdminIdentity> {
   const supabase = await getServerSupabase();
   const {
     data: { user },
@@ -67,6 +75,25 @@ export async function requireAdmin(): Promise<AdminIdentity> {
     // limbo, then redirect.
     await supabase.auth.signOut();
     redirect("/admin/login?error=not_admin");
+  }
+
+  if (!options?.skipMfa) {
+    const { data: aal, error: aalError } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aalError) {
+      // Don't lock out a verified admin on a transient AAL read error.
+      // eslint-disable-next-line no-console
+      console.error("[requireAdmin] AAL lookup failed", aalError);
+    } else if (aal) {
+      // nextLevel === "aal1" → no MFA factor enrolled at all.
+      if (aal.nextLevel === "aal1") {
+        redirect("/admin/2fa/setup");
+      }
+      // Factor enrolled (nextLevel aal2) but session not yet elevated.
+      if (aal.currentLevel !== "aal2") {
+        redirect("/admin/2fa");
+      }
+    }
   }
 
   return {
