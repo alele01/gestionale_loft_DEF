@@ -250,18 +250,25 @@ describe("filename / helpers", () => {
     assert.equal(formatRomeDate("2026-05-23T12:00:00Z"), "2026-05-23");
   });
 
-  it("invoiceDocumentDate always returns the 28th of the payment month (Rome)", () => {
-    assert.equal(invoiceDocumentDate("2026-05-03T12:00:00Z"), "2026-05-28");
+  it("invoiceDocumentDate returns the last day of the payment month (Rome)", () => {
+    // 31-day month
+    assert.equal(invoiceDocumentDate("2026-05-03T12:00:00Z"), "2026-05-31");
+    // 30-day month
+    assert.equal(invoiceDocumentDate("2026-06-10T12:00:00Z"), "2026-06-30");
+    // February (non-leap 2026 → 28)
     assert.equal(invoiceDocumentDate("2026-02-15T09:30:00Z"), "2026-02-28");
+    // February (leap 2028 → 29)
+    assert.equal(invoiceDocumentDate("2028-02-15T09:30:00Z"), "2028-02-29");
     // Late-evening UTC on the last day of a month rolls into next month in Rome.
-    assert.equal(invoiceDocumentDate("2026-06-30T23:30:00Z"), "2026-07-28");
+    assert.equal(invoiceDocumentDate("2026-06-30T23:30:00Z"), "2026-07-31");
   });
 
-  it("buildInvoiceXml dates the document on the 28th, not the payment day", () => {
+  it("buildInvoiceXml dates the document on the last day of the month, not the payment day", () => {
     const { content } = buildInvoiceXml(companyWithSdi);
     const dataMatch = content.match(/<Data>(\d{4}-\d{2}-\d{2})<\/Data>/);
     assert.ok(dataMatch, "expected a <Data> element");
-    assert.match(dataMatch![1], /-28$/);
+    // companyWithSdi is paid in May → 2026-05-31
+    assert.equal(dataMatch![1], "2026-05-31");
   });
 });
 

@@ -254,8 +254,9 @@ function buildDatiBeniServizi(
 }
 
 function buildDatiPagamento(input: InvoiceInput): string {
-  // Align the payment-term reference/due dates to the document date (28th)
-  // so the invoice never shows a due date earlier than its issue date.
+  // Align the payment-term reference/due dates to the document date (last
+  // day of the month) so the invoice never shows a due date earlier than
+  // its issue date.
   const paymentDate = invoiceDocumentDate(input.paidAtIso);
   const mode = input.paymentMode ?? "MP08";
   return (
@@ -340,8 +341,10 @@ export function formatRomeDate(iso: string): string {
 
 /**
  * Invoice document date (`<Data>` in DatiGeneraliDocumento). Per the
- * venue's accounting policy the document is always dated the 28th of the
- * month in which the booking was paid — never the actual payment day.
+ * venue's accounting policy the document is always dated the LAST day of
+ * the month in which the booking was paid — never the actual payment day.
+ * E.g. all June bookings (exported on July 1st) are dated 2026-06-30;
+ * February bookings get 2026-02-28 (or -29 in a leap year).
  * The month/year are taken in `Europe/Rome` so the calendar boundary
  * matches the accountant's.
  */
@@ -356,5 +359,7 @@ export function invoiceDocumentDate(paidAtIso: string): string {
   if (!year || !month) {
     throw new Error(`invoiceDocumentDate: cannot derive month from ${paidAtIso}`);
   }
-  return `${year}-${month}-28`;
+  // Day 0 of the *next* month (1-indexed `month`) === last day of `month`.
+  const lastDay = new Date(Date.UTC(Number(year), Number(month), 0)).getUTCDate();
+  return `${year}-${month}-${String(lastDay).padStart(2, "0")}`;
 }
