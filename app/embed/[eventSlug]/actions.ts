@@ -71,11 +71,14 @@ const SubmitSchema = z.object({
     .refine((v) => /\p{L}/u.test(v), { message: "Cognome non valido" }),
   email: EmailSchema,
   phone: PhoneSchema,
+  // Absolute safety ceiling only (matches the events.capacity cap). The
+  // real, per-event limit is enforced server-side in submitBookingRequest
+  // against the event's actual capacity, mirroring the form's max.
   people: z.coerce
     .number({ message: "Indica il numero di persone" })
     .int("Solo numeri interi")
     .min(1, "Minimo 1 persona")
-    .max(50, "Massimo 50 persone"),
+    .max(500, "Numero di partecipanti non valido"),
   dietaryNotes: optionalText(2000),
   specialOccasion: optionalText(500),
   consentTerms: z.literal("on", { message: "Conferma richiesta" }),
@@ -215,7 +218,13 @@ export async function submitRequestAction(
       return { status: "error", message: err.message };
     }
     if (err instanceof ValidationError) {
-      return { status: "error", message: err.message };
+      const field =
+        typeof err.details?.field === "string" ? err.details.field : undefined;
+      return {
+        status: "error",
+        message: err.message,
+        fieldErrors: field ? { [field]: err.message } : undefined,
+      };
     }
     // eslint-disable-next-line no-console
     console.error("[embed] submitRequest failed", err);

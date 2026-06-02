@@ -55,6 +55,16 @@ export async function submitBookingRequest(
   if (eventRes.data.status !== "published") {
     throw new ValidationError("Evento non disponibile per nuove prenotazioni");
   }
+  // Enforce the event's real capacity as the upper bound for the request.
+  // This mirrors the form's `max={event.capacity}` and replaces the old
+  // hardcoded 50-person cap. It does NOT subtract already-paid seats:
+  // availability against paid bookings is checked later, at admin accept.
+  if (input.people > eventRes.data.capacity) {
+    throw new ValidationError(
+      `Numero massimo di partecipanti per questo evento: ${eventRes.data.capacity}.`,
+      { field: "people" }
+    );
+  }
   const eventForEmail = {
     title: eventRes.data.title,
     starts_at: eventRes.data.starts_at,

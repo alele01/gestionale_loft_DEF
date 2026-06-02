@@ -212,7 +212,7 @@ function FormBody({
         label={
           <>
             Allergie, intolleranze o esigenze alimentari di{" "}
-            <strong>tutti i partecipanti</strong>
+            <strong className="font-bold">tutti i partecipanti</strong>
           </>
         }
         hint={
@@ -419,7 +419,7 @@ function SuccessState({
             </li>
             <li>
               Riceverai un&apos;email con la conferma (o, in alternativa, un
-              messaggio sulla lista d&apos;attesa o sul rifiuto).
+              messaggio sulla lista d&apos;attesa).
             </li>
             <li>
               Se confermata, l&apos;email includerà un link sicuro per
@@ -457,9 +457,9 @@ function Field({
 }) {
   return (
     <div className={compact ? "space-y-2" : "space-y-1.5"}>
-      <Label htmlFor={id} className="cl-field-label flex items-center gap-1">
+      <Label htmlFor={id} className="cl-field-label">
         {label}
-        {required ? <span className="text-[#AA2620]">*</span> : null}
+        {required ? <span className="text-[#AA2620]"> *</span> : null}
       </Label>
       {children}
       {error ? (

@@ -109,11 +109,16 @@
  * Consent labels (.cl-consent-label): normal sentence case, readable.
  */
 .cooker-brand .cl-form .cl-field-label {
+  display: block;
   font-size: 0.8125rem; /* 13px — matches legacy JetFormBuilder */
   font-weight: 700;
   letter-spacing: 0.04em;
+  line-height: 1.45;
   text-transform: uppercase;
   color: #78423f;
+  /* Long labels (e.g. allergies) must wrap as normal text, not flex columns */
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .cooker-brand .cl-form .cl-section-title {
