@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { CalendarDays, CheckCircle2, Sparkles } from "lucide-react";
+import { CalendarDays, CheckCircle2, Minus, Plus, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -188,20 +188,20 @@ function FormBody({
             placeholder="+39 333 1122334"
           />
         </Field>
-        <Field id="people" label="Persone" required error={fieldErrors.people} compact={compact}>
-          <Input
-            id="people"
-            name="people"
-            type="number"
+        <Field
+          id="people"
+          label="Persone"
+          required
+          error={fieldErrors.people}
+          hint={`Massimo ${event.capacity} per questo evento.`}
+          compact={compact}
+        >
+          <input type="hidden" name="people" value={people} />
+          <PeopleStepper
+            value={people}
             min={1}
             max={event.capacity}
-            required
-            value={people}
-            onChange={(e) =>
-              setPeople(
-                Math.max(1, Math.min(event.capacity, Number(e.target.value) || 1))
-              )
-            }
+            onChange={setPeople}
           />
         </Field>
       </div>
@@ -332,6 +332,75 @@ function FormBody({
         </p>
       ) : null}
     </form>
+  );
+}
+
+/**
+ * Mobile-friendly number stepper for the "Persone" field. The visible
+ * input keeps a local string draft so the user can clear it while typing
+ * (the old controlled number input snapped back instantly on mobile);
+ * the value is clamped to [min, max] only on blur. The +/- buttons give
+ * a thumb-friendly way to adjust without the OS numeric keyboard.
+ */
+function PeopleStepper({
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (n: number) => void;
+}) {
+  const [draft, setDraft] = React.useState(String(value));
+
+  React.useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const clamp = (n: number) => Math.max(min, Math.min(max, n));
+
+  const commit = (raw: string) => {
+    const n = Number.parseInt(raw, 10);
+    const next = Number.isNaN(n) ? value : clamp(n);
+    onChange(next);
+    setDraft(String(next));
+  };
+
+  return (
+    <div className="cl-stepper">
+      <button
+        type="button"
+        className="cl-stepper-btn"
+        onClick={() => onChange(clamp(value - 1))}
+        disabled={value <= min}
+        aria-label="Diminuisci numero di persone"
+      >
+        <Minus className="h-5 w-5" aria-hidden="true" />
+      </button>
+      <input
+        id="people"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        className="cl-stepper-input"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+        onFocus={(e) => e.target.select()}
+        onBlur={(e) => commit(e.target.value)}
+        aria-label="Numero di persone"
+      />
+      <button
+        type="button"
+        className="cl-stepper-btn"
+        onClick={() => onChange(clamp(value + 1))}
+        disabled={value >= max}
+        aria-label="Aumenta numero di persone"
+      >
+        <Plus className="h-5 w-5" aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 
