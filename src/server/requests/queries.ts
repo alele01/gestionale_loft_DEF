@@ -1,6 +1,12 @@
 import "server-only";
 
 import { deriveUnifiedStatus, type UnifiedStatus } from "@/lib/status";
+import {
+  indexRequestDuplicates,
+  normalizeRequestEmail,
+  normalizeRequestPhone,
+  type RequestDuplicateInfo,
+} from "@/lib/request-duplicates";
 import { getServiceClient, type Tables } from "@/server/supabase";
 
 export type BookingRequestRow = Tables<"booking_requests">;
@@ -135,4 +141,71 @@ export async function listRequestsForEvent(
       };
     })
     .filter((row): row is RequestContext => row !== null);
+}
+
+export type PotentialDuplicateRequest = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+  submittedAt: string;
+  matchTypes: RequestDuplicateInfo["matchTypes"];
+};
+
+/**
+ * Other requests on the same event that share email or phone with the
+ * current one. Used for admin duplicate warnings (informational only).
+ */
+export async function listPotentialDuplicateRequests(
+  eventId: string,
+  requestId: string,
+  email: string,
+  phone: string
+): Promise<PotentialDuplicateRequest[]> {
+  const siblings = await listRequestsForEvent(eventId);
+  const index = indexRequestDuplicates(
+    siblings.map((row) => ({
+      id: row.request.id,
+      eventId: row.event.id,
+      email: row.request.requester_email,
+      phone: row.request.requester_phone,
+    }))
+  );
+
+  const info = index.get(requestId);
+  if (!info) return [];
+
+  const targetEmail = normalizeRequestEmail(email);
+  const targetPhone = normalizeRequestPhone(phone);
+
+  return siblings
+    .filter((row) => info.otherIds.includes(row.request.id))
+    .map((row) => {
+      const matchTypes: RequestDuplicateInfo["matchTypes"] = [];
+      if (
+        normalizeRequestEmail(row.request.requester_email) === targetEmail
+      ) {
+        matchTypes.push("email");
+      }
+      const rowPhone = normalizeRequestPhone(row.request.requester_phone);
+      if (
+        targetPhone.length >= 8 &&
+        rowPhone === targetPhone &&
+        rowPhone.length >= 8
+      ) {
+        if (!matchTypes.includes("phone")) matchTypes.push("phone");
+      }
+      return {
+        id: row.request.id,
+        firstName: row.request.requester_first_name,
+        lastName: row.request.requester_last_name,
+        status: row.request.status,
+        submittedAt: row.request.submitted_at,
+        matchTypes,
+      };
+    })
+    .sort(
+      (a, b) =>
+        Date.parse(b.submittedAt) - Date.parse(a.submittedAt)
+    );
 }

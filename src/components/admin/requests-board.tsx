@@ -21,12 +21,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UnifiedStatusBadge } from "@/components/shared/unified-status-badge";
+import { DuplicateRequestBadge } from "@/components/admin/duplicate-request-badge";
 import { formatDateTime } from "@/lib/format";
 import {
   REQUEST_STATUS_HINT,
   REQUEST_STATUS_ORDER,
   type RequestListItem,
 } from "@/lib/request-list";
+import { indexRequestDuplicates } from "@/lib/request-duplicates";
 import { unifiedStatusLabel, type UnifiedStatus } from "@/lib/status";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +84,11 @@ export function RequestsBoard({
     }
     return acc;
   }, [eventScoped]);
+
+  const duplicateIndex = React.useMemo(
+    () => indexRequestDuplicates(items),
+    [items]
+  );
 
   // Only surface status pills that actually have rows in the current scope.
   const presentStatuses = REQUEST_STATUS_ORDER.filter(
@@ -223,6 +230,13 @@ export function RequestsBoard({
                           <Users className="mr-1 inline h-3 w-3" />
                           {row.people}
                         </span>
+                        {duplicateIndex.get(row.id) ? (
+                          <span className="ml-2 inline-flex align-middle">
+                            <DuplicateRequestBadge
+                              info={duplicateIndex.get(row.id)!}
+                            />
+                          </span>
+                        ) : null}
                       </p>
                       {showEvent ? (
                         <p className="truncate text-xs text-muted-foreground">

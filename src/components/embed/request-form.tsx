@@ -193,7 +193,6 @@ function FormBody({
           label="Persone"
           required
           error={fieldErrors.people}
-          hint={`Massimo ${event.capacity} per questo evento.`}
           compact={compact}
         >
           <input type="hidden" name="people" value={people} />

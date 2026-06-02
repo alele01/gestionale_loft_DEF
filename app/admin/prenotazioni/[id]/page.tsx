@@ -25,9 +25,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PrenotazioneDetailActions } from "@/components/admin/prenotazione-detail-actions";
+import { DuplicateRequestAlert } from "@/components/admin/duplicate-request-alert";
 import { formatDateTime } from "@/lib/format";
 import { requireAdmin } from "@/server/auth/require-admin";
-import { getRequestContext } from "@/server/requests/queries";
+import {
+  getRequestContext,
+  listPotentialDuplicateRequests,
+} from "@/server/requests/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +46,12 @@ export default async function PrenotazioneDetailPage({
   if (!ctx) notFound();
 
   const { request, booking, event, fiscal, unifiedStatus } = ctx;
+  const duplicates = await listPotentialDuplicateRequests(
+    event.id,
+    request.id,
+    request.requester_email,
+    request.requester_phone
+  );
   const isCancelledAfterPayment =
     booking?.status === "paid" && booking.cancelled_after_payment_at !== null;
 
@@ -93,6 +103,8 @@ export default async function PrenotazioneDetailPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <DuplicateRequestAlert duplicates={duplicates} />
 
       <PrenotazioneDetailActions
         requestId={request.id}

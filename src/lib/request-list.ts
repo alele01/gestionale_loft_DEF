@@ -11,6 +11,7 @@ export type RequestListItem = {
   lastName: string;
   people: number;
   email: string;
+  phone: string;
   submittedAt: string;
   eventId: string;
   eventTitle: string;
@@ -29,6 +30,7 @@ type RequestContextLike = {
     requester_first_name: string;
     requester_last_name: string;
     requester_email: string;
+    requester_phone: string;
     people: number;
     submitted_at: string;
   };
@@ -44,6 +46,7 @@ export function toRequestListItem(ctx: RequestContextLike): RequestListItem {
     lastName: ctx.request.requester_last_name,
     people: ctx.booking?.people ?? ctx.request.people,
     email: ctx.request.requester_email,
+    phone: ctx.request.requester_phone,
     submittedAt: ctx.request.submitted_at,
     eventId: ctx.event.id,
     eventTitle: ctx.event.title,
