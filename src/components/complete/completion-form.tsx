@@ -41,6 +41,7 @@ import {
   validateItalianTaxCode,
   type TaxCodeValidation,
 } from "@/lib/codice-fiscale";
+import { isValidPartitaIva } from "@/lib/partita-iva";
 import {
   completeBookingAction,
   type CompletionActionState,
@@ -554,6 +555,7 @@ function FormBody({
                     value={vatNumber}
                     onChange={(e) => setVatNumber(e.target.value)}
                   />
+                  <VatNumberHint value={vatNumber} />
                 </Field>
                 <Field
                   id="sdiCode"
@@ -1230,6 +1232,43 @@ function TaxCodeHint({ value }: { value: string }) {
     <p className="text-[11px] text-amber-700">
       Carattere di controllo non corretto: controlla di averlo scritto
       correttamente.
+    </p>
+  );
+}
+
+/**
+ * Inline hint for the Partita IVA field (company buyer only). Offline
+ * check of the official check digit — never blocking (the server zod
+ * schema is authoritative), it just helps catch typos before payment.
+ */
+function VatNumberHint({ value }: { value: string }) {
+  const cleaned = value.replace(/\s+/g, "");
+  if (cleaned.length === 0) return null;
+  if (!/^\d+$/.test(cleaned)) {
+    return (
+      <p className="text-[11px] text-muted-foreground">
+        La Partita IVA è composta da 11 cifre.
+      </p>
+    );
+  }
+  if (cleaned.length !== 11) {
+    return (
+      <p className="text-[11px] text-muted-foreground">
+        La Partita IVA è composta da 11 cifre ({cleaned.length}/11).
+      </p>
+    );
+  }
+  if (!isValidPartitaIva(cleaned)) {
+    return (
+      <p className="text-[11px] text-amber-700">
+        Cifra di controllo non corretta: controlla di aver scritto bene la
+        Partita IVA.
+      </p>
+    );
+  }
+  return (
+    <p className="text-[11px] text-emerald-700">
+      Partita IVA formalmente valida.
     </p>
   );
 }

@@ -259,15 +259,14 @@ function FormBody({
           compact={compact}
           label={
             <>
-              Dichiaro di aver letto e accettato i{" "}
+              Dichiaro di aver letto, compreso e accettato le{" "}
               <DocLink href={LEGAL_DOCS.termsBooking}>
-                termini e le condizioni per la prenotazione di eventi
-              </DocLink>{" "}
-              e le{" "}
-              <DocLink href={LEGAL_DOCS.conditionsOfUse}>
-                condizioni di utilizzo
+                Condizioni Generali di Partecipazione agli Eventi Cooker Loft
               </DocLink>
-              .
+              , anche nell&apos;interesse e per conto degli altri partecipanti
+              inclusi nella prenotazione, dichiarando di essere autorizzato a
+              effettuare la prenotazione e ad accettare le relative condizioni
+              anche per loro conto.
             </>
           }
         />

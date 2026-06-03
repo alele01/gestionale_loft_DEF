@@ -30,13 +30,14 @@ export function E1RequestReceived({
     <EmailLayout preview={`Abbiamo ricevuto la tua richiesta per ${eventTitle}`}>
       <Heading>Ciao {requesterFirstName}, abbiamo ricevuto la tua richiesta</Heading>
       <Paragraph>
-        Grazie per averci scritto. Abbiamo registrato la tua richiesta di
-        prenotazione e il nostro team la valuterà nei prossimi giorni.
+        Grazie per aver inviato la tua richiesta di prenotazione, che è stata
+        registrata correttamente. Il nostro team ti contatterà il prima possibile
+        per informarti sullo stato della tua richiesta.
       </Paragraph>
       <Paragraph>
-        <strong>Questa non è ancora una conferma:</strong> ti scriveremo non
-        appena la richiesta sarà esaminata, con le indicazioni per completare
-        la prenotazione oppure con un aggiornamento sullo stato.
+        <strong>Attenzione, questa non è ancora una conferma:</strong> ti
+        scriveremo non appena la richiesta sarà validata, con le indicazioni per
+        completare la prenotazione, oppure con un aggiornamento sullo stato.
       </Paragraph>
 
       <EventRecap
@@ -47,7 +48,7 @@ export function E1RequestReceived({
         }}
       />
 
-      <Paragraph>A presto,</Paragraph>
+      <Paragraph>Grazie ancora!</Paragraph>
       <Paragraph>
         <strong>Il team Cooker Loft</strong>
       </Paragraph>

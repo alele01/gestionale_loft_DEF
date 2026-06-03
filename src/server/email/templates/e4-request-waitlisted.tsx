@@ -31,11 +31,13 @@ export function E4RequestWaitlisted({
 }: E4Props) {
   return (
     <EmailLayout preview={`Sei in lista d'attesa per ${eventTitle}`}>
-      <Heading>Ciao {requesterFirstName}, sei in lista d&apos;attesa</Heading>
+      <Heading>
+        Ciao {requesterFirstName}, sei in lista d&apos;attesa!
+      </Heading>
       <Paragraph>
-        Abbiamo ricevuto la tua richiesta e l&apos;abbiamo inserita nella{" "}
-        <strong>lista d&apos;attesa</strong> per questo evento. Al momento non
-        ci sono posti disponibili, ma ti scriveremo se la situazione cambia.
+        Abbiamo ricevuto la tua richiesta e l&apos;abbiamo inserita nella lista
+        d&apos;attesa. Purtroppo al momento per questo evento non ci sono posti
+        disponibili, se si dovessero liberare ti aggiorneremo!
       </Paragraph>
 
       <EventRecap
@@ -53,7 +55,7 @@ export function E4RequestWaitlisted({
       </InfoBlock>
 
       <Paragraph>
-        Grazie per la pazienza,
+        Grazie mille.
         <br />
         <strong>Il team Cooker Loft</strong>
       </Paragraph>

@@ -2,8 +2,15 @@ import "server-only";
 
 import { appendAuditLogWithClient } from "@/server/audit/log";
 import { AUDIT_ACTIONS, AUDIT_ACTORS, AUDIT_ENTITIES } from "@/server/audit-actions";
+import { validateItalianTaxCode } from "@/lib/codice-fiscale";
 import { isValidProvinceCode } from "@/lib/italian-provinces";
+import { isValidPartitaIva } from "@/lib/partita-iva";
 import { createCheckoutSession } from "@/server/stripe";
+import {
+  validateInvoiceInput,
+  XmlValidationError,
+  type InvoiceInput,
+} from "@/modules/xml-export";
 
 import { createActionContext } from "../context";
 import {
@@ -144,7 +151,7 @@ export async function completeBooking(
   const hash = hashCompletionToken(input.tokenPlaintext);
   const bookingRes = await ctx.client
     .from("bookings")
-    .select("*, events(id, title, price_cents, starts_at)")
+    .select("*, events(id, title, price_cents, starts_at, vat_rate_bps)")
     .filter("completion_token_hash", "eq", hashToPostgresHex(hash))
     .maybeSingle();
   if (bookingRes.error) throw bookingRes.error;
@@ -177,6 +184,22 @@ export async function completeBooking(
       `Importo non coerente con l'evento (atteso ${expectedAmount}c, trovato ${booking.amount_cents}c). Ricarica la pagina e riprova.`
     );
   }
+
+  // Dry-run "a prova di fattura": prima di mandare al pagamento, verifichiamo
+  // che con questi dati l'XML FatturaPA sarebbe effettivamente generabile,
+  // applicando le stesse regole del job di export. Se qualcosa non torna
+  // (qualunque campo, anche futuro), blocchiamo QUI — così non esiste lo
+  // scenario "prenotazione pagata ma fattura non generabile".
+  assertInvoiceGeneratable({
+    bookingId: booking.id,
+    fiscal: input.fiscal,
+    people: booking.people,
+    amountCents: booking.amount_cents,
+    unitGrossPriceCents: eventForBooking.price_cents,
+    vatRateBps: eventForBooking.vat_rate_bps,
+    eventTitle: eventForBooking.title,
+    nowIso: ctx.now.toISOString(),
+  });
 
   // Upsert fiscal_profiles (booking_id is the unique key).
   const fiscalUpsert = await ctx.client
@@ -413,6 +436,89 @@ function validateParticipantsAndMinors(input: CompleteBookingInput) {
   }
 }
 
+/**
+ * Build a placeholder `InvoiceInput` from the completion data and run the
+ * XML module's `validateInvoiceInput`. We do NOT generate or persist any
+ * XML here — this is a pure validation pass that mirrors EXACTLY what the
+ * monthly export job will require, so that any booking we let through to
+ * payment is guaranteed to be invoiceable later.
+ *
+ * Placeholder values (invoice number / transmission progressive / paid-at)
+ * are well-formed dummies: at completion time the real ones don't exist
+ * yet, and they don't depend on user input — only the buyer/amount data
+ * does, which is what we actually want to validate.
+ */
+function assertInvoiceGeneratable(args: {
+  bookingId: string;
+  fiscal: FiscalProfileInput;
+  people: number;
+  amountCents: number;
+  unitGrossPriceCents: number;
+  vatRateBps: number;
+  eventTitle: string;
+  nowIso: string;
+}) {
+  const fp = args.fiscal;
+  const address = {
+    street: fp.addressStreet.trim(),
+    streetNumber: null,
+    zip: fp.addressZip.trim(),
+    city: fp.addressCity.trim(),
+    province: (fp.addressProvince ?? "").trim().toUpperCase(),
+    country: "IT" as const,
+  };
+
+  const buyer: InvoiceInput["buyer"] =
+    fp.kind === "private"
+      ? {
+          kind: "private",
+          taxCode: (fp.taxCode ?? "").trim(),
+          firstName: (fp.firstName ?? "").trim(),
+          lastName: (fp.lastName ?? "").trim(),
+          address,
+          sdiCode: fp.sdiCode?.trim() || null,
+          pecEmail: fp.pecEmail?.trim() || null,
+        }
+      : {
+          kind: "company",
+          vatNumber: (fp.vatNumber ?? "").replace(/\s+/g, ""),
+          taxCode: fp.taxCode?.trim() || null,
+          denomination: fp.legalName.trim(),
+          address,
+          sdiCode: fp.sdiCode?.trim() || "0000000",
+          pecEmail: fp.pecEmail?.trim() || null,
+        };
+
+  const dryRun: InvoiceInput = {
+    bookingId: args.bookingId,
+    // Placeholders: shape-valid, assigned for real only by the export job.
+    invoiceNumber: "2026/0001",
+    transmissionProgressive: "0000000001",
+    paidAtIso: args.nowIso,
+    currency: "EUR",
+    grossAmountCents: args.amountCents,
+    vatRateBps: args.vatRateBps,
+    line: {
+      description: `${args.eventTitle} — anteprima fattura`,
+      quantity: args.people,
+      unitGrossPriceCents: args.unitGrossPriceCents,
+    },
+    buyer,
+    paymentMode: "MP08",
+  };
+
+  try {
+    validateInvoiceInput(dryRun);
+  } catch (err) {
+    if (err instanceof XmlValidationError) {
+      throw new ValidationError(
+        `I dati di fatturazione non sono validi: ${err.message}. Correggili prima di procedere al pagamento.`
+      );
+    }
+    throw err;
+  }
+}
+
 function validateFiscal(fp: FiscalProfileInput) {
   if (!fp.legalName.trim()) throw new ValidationError("Nominativo richiesto");
   if (!fp.addressStreet.trim()) throw new ValidationError("Indirizzo richiesto");
@@ -444,15 +550,16 @@ function validateFiscal(fp: FiscalProfileInput) {
     if (!fp.taxCode?.trim()) {
       throw new ValidationError("Codice fiscale richiesto per privato");
     }
-    if (!/^[A-Z0-9]{16}$/i.test(fp.taxCode.replace(/\s+/g, ""))) {
+    // Carattere di controllo (DM 23/12/1976) o P.IVA usata come CF.
+    if (validateItalianTaxCode(fp.taxCode).kind !== "valid") {
       throw new ValidationError("Codice fiscale non valido");
     }
   } else if (fp.kind === "company") {
     if (!fp.vatNumber?.trim()) {
       throw new ValidationError("Partita IVA richiesta per azienda");
     }
-    if (!/^\d{11}$/.test(fp.vatNumber.replace(/\s+/g, ""))) {
-      throw new ValidationError("Partita IVA: 11 cifre");
+    if (!isValidPartitaIva(fp.vatNumber)) {
+      throw new ValidationError("Partita IVA non valida (11 cifre)");
     }
     // SDI OBBLIGATORIO (7 caratteri alfanumerici). PEC facoltativa, ma se
     // presente deve essere un indirizzo email valido.

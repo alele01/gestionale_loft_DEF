@@ -30,11 +30,12 @@ export function E3RequestRejected({
 }: E3Props) {
   return (
     <EmailLayout preview={`Aggiornamento sulla tua richiesta — ${eventTitle}`}>
-      <Heading>Ciao {requesterFirstName}, un aggiornamento sulla tua richiesta</Heading>
+      <Heading>
+        Ciao {requesterFirstName}, abbiamo un aggiornamento sulla tua richiesta
+      </Heading>
       <Paragraph>
         Ti scriviamo per informarti che, purtroppo, non possiamo confermare la
-        tua richiesta per questo evento. Speriamo di poterti accogliere in una
-        delle prossime occasioni.
+        tua richiesta per questo evento. Speriamo di poterti accogliere presto!
       </Paragraph>
 
       <EventRecap
@@ -46,12 +47,7 @@ export function E3RequestRejected({
       />
 
       <Paragraph>
-        Se vuoi, puoi dare un&apos;occhiata ai prossimi eventi in calendario sul
-        nostro sito. Per qualsiasi domanda, rispondi pure a questa email.
-      </Paragraph>
-
-      <Paragraph>
-        Grazie per averci scelto,
+        Grazie mille.
         <br />
         <strong>Il team Cooker Loft</strong>
       </Paragraph>

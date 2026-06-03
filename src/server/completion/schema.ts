@@ -1,6 +1,8 @@
 import { z } from "zod";
 
+import { validateItalianTaxCode } from "@/lib/codice-fiscale";
 import { ITALIAN_PROVINCE_CODES } from "@/lib/italian-provinces";
+import { isValidPartitaIva } from "@/lib/partita-iva";
 
 /**
  * Schema for the /complete/[token] form submission.
@@ -189,14 +191,25 @@ export const CompletionFormSchema = z
           message: "Cognome richiesto per privato",
         });
       }
-      if (
-        !data.taxCode ||
-        !/^[A-Z0-9]{16}$/i.test(data.taxCode.replace(/\s+/g, ""))
-      ) {
+      // Codice fiscale: oltre al formato, verifichiamo il carattere di
+      // controllo (DM 23/12/1976) o, in alternativa, una P.IVA usata come
+      // CF (ditta individuale). Così un CF formalmente impossibile viene
+      // bloccato PRIMA del pagamento e non manda in errore la fattura.
+      const cfCheck = data.taxCode
+        ? validateItalianTaxCode(data.taxCode)
+        : ({ kind: "empty" } as const);
+      if (cfCheck.kind !== "valid") {
         ctx.addIssue({
           code: "custom",
           path: ["taxCode"],
-          message: "Codice fiscale: 16 caratteri alfanumerici",
+          message:
+            cfCheck.kind === "empty"
+              ? "Codice fiscale richiesto per privato"
+              : cfCheck.reason === "length"
+                ? "Codice fiscale: 16 caratteri (o 11 cifre per ditta individuale)"
+                : cfCheck.reason === "format"
+                  ? "Codice fiscale: formato non valido (controlla lettere/cifre e la lettera del mese)"
+                  : "Codice fiscale: carattere di controllo errato, ricontrolla",
         });
       }
     } else {
@@ -208,14 +221,14 @@ export const CompletionFormSchema = z
           message: "Ragione sociale richiesta",
         });
       }
-      if (
-        !data.vatNumber ||
-        !/^\d{11}$/.test(data.vatNumber.replace(/\s+/g, ""))
-      ) {
+      // Partita IVA: 11 cifre CON carattere di controllo valido (algoritmo
+      // ufficiale). Intercetta i refusi prima del pagamento, evitando
+      // fatture verso P.IVA inesistenti che lo SDI rifiuterebbe.
+      if (!data.vatNumber || !isValidPartitaIva(data.vatNumber)) {
         ctx.addIssue({
           code: "custom",
           path: ["vatNumber"],
-          message: "Partita IVA: 11 cifre",
+          message: "Partita IVA non valida (11 cifre, controlla il numero)",
         });
       }
       // Codice SDI obbligatorio. La PEC è facoltativa: se presente, è già
