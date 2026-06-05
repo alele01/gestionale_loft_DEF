@@ -7,6 +7,7 @@ import { appendAuditLog } from "@/server/audit/log";
 import { AUDIT_ACTIONS, AUDIT_ACTORS, AUDIT_ENTITIES } from "@/server/audit-actions";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { getServiceClient } from "@/server/supabase";
+import { romeLocalToUtcIso } from "@/lib/rome-time";
 
 import {
   EventCreateSchema,
@@ -50,7 +51,9 @@ export async function createEventAction(
   const baseSlug = slugify(values.slug ?? values.title);
   const slug = await ensureUniqueSlug(client, baseSlug);
 
-  const startsAtISO = new Date(values.startsAt).toISOString();
+  // The form sends a timezone-less wall-clock string (Europe/Rome). Anchor
+  // it to Rome so the stored UTC instant matches what the admin typed.
+  const startsAtISO = romeLocalToUtcIso(values.startsAt);
 
   const { data, error } = await client
     .from("events")
@@ -125,7 +128,7 @@ export async function editEventAction(
       ? existing.slug
       : await ensureUniqueSlug(client, baseSlug, existing.id);
 
-  const startsAtISO = new Date(values.startsAt).toISOString();
+  const startsAtISO = romeLocalToUtcIso(values.startsAt);
 
   const { error } = await client
     .from("events")

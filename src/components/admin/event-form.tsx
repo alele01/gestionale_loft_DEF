@@ -22,6 +22,7 @@ import type {
   EventCreateInput,
   EventEditInput,
 } from "@/server/events/schema";
+import { utcIsoToRomeLocal } from "@/lib/rome-time";
 
 export type EventFormInitial = {
   id: string;
@@ -40,19 +41,13 @@ type EventFormProps =
   | { mode: "create"; initial?: undefined }
   | { mode: "edit"; initial: EventFormInitial };
 
-function isoToLocalDateInput(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
-}
-
 function defaultStartsAtLocal() {
   const now = new Date();
   now.setDate(now.getDate() + 30);
   now.setHours(20, 0, 0, 0);
-  return isoToLocalDateInput(now.toISOString());
+  // Render the default in Europe/Rome wall time so it round-trips through
+  // the same conversion the server applies on save.
+  return utcIsoToRomeLocal(now.toISOString());
 }
 
 export function EventForm(props: EventFormProps) {
@@ -62,7 +57,7 @@ export function EventForm(props: EventFormProps) {
   const initial = props.mode === "edit"
     ? {
         title: props.initial.title,
-        startsAtLocal: isoToLocalDateInput(props.initial.startsAt),
+        startsAtLocal: utcIsoToRomeLocal(props.initial.startsAt),
         capacity: props.initial.capacity,
         priceEuro: (props.initial.priceCents / 100).toFixed(2),
         slug: props.initial.slug,

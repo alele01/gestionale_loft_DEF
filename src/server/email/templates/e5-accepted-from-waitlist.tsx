@@ -60,7 +60,7 @@ export function E5AcceptedFromWaitlist({
           <Paragraph>
             Si è liberato un posto e siamo riusciti a confermare la tua
             richiesta. Per completare la prenotazione, compila i dati e
-            procedi al pagamento entro il termine indicato.
+            procedi al pagamento.
           </Paragraph>
         </>
       )}
