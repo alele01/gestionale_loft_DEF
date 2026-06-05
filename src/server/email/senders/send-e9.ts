@@ -27,7 +27,7 @@ export async function sendE9ReviewRequest(
     emailId: "E9",
     entity: { type: "booking", id: input.bookingId },
     to: input.requesterEmail,
-    subject: "Grazie per averci scelti — lasciaci una recensione su Google",
+    subject: "Grazie, dal team di COOKER LOFT ❤️",
     react: React.createElement(E9ReviewRequest, {
       requesterFirstName: input.requesterFirstName,
       eventTitle: input.eventTitle,

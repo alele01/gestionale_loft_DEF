@@ -91,7 +91,7 @@ export function E7PaymentRetry({
       <InfoBlock>
         Il pulsante apre una nuova sessione Stripe Checkout. Se anche questa
         scade, puoi sempre riaprire questa email e cliccare di nuovo: il
-        sistema genera ogni volta un link fresco finché la prenotazione resta
+        sistema genera ogni volta un link nuovo finché la prenotazione resta
         in attesa di pagamento.
       </InfoBlock>
 

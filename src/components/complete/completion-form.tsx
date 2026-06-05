@@ -453,8 +453,7 @@ function FormBody({
         <CardHeader>
           <CardTitle className="text-base">Dati fiscali</CardTitle>
           <p className="text-xs text-muted-foreground">
-            Necessari per l&apos;emissione della fattura. Verranno congelati al
-            momento del pagamento.
+            Necessari per l&apos;emissione della fattura. Al momento del pagamento non saranno più modificabili.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

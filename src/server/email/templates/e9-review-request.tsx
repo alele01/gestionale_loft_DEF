@@ -30,12 +30,18 @@ export function E9ReviewRequest({
   reviewUrl,
 }: E9Props) {
   return (
-    <EmailLayout preview="Grazie per averci scelti — lasciaci una recensione su Google">
-      <Heading>Grazie, {requesterFirstName}!</Heading>
+    <EmailLayout preview="Grazie per aver partecipato — lasciaci una recensione su Google">
+      <Heading>Ciao, {requesterFirstName}!</Heading>
       <Paragraph>
-        Speriamo davvero che <strong>{eventTitle}</strong> sia stato
-        un&apos;ottima esperienza. Se ti va, ci aiuteresti molto lasciandoci
-        una recensione su Google: bastano due minuti.
+        ti ringraziamo di cuore per aver partecipato all&apos;evento{" "}
+        <strong>{eventTitle}</strong>. È stato emozionante condividere questa
+        giornata con tutti voi! Speriamo che l&apos;atmosfera e i sapori di
+        Cooker Loft vi siano rimasti nel cuore.
+      </Paragraph>
+      <Paragraph>
+        Ci farebbe davvero piacere se potessi condividere la tua esperienza
+        lasciando una recensione su Google. Il tuo feedback è prezioso e ci
+        aiuta a crescere e migliorare.
       </Paragraph>
 
       <PrimaryButton href={reviewUrl}>
@@ -44,7 +50,7 @@ export function E9ReviewRequest({
 
       <Muted>
         Se invece qualcosa non è andato come speravi, rispondi pure a questa
-        email prima di lasciare una recensione: ci interessa ascoltarti.
+        email. Siamo qui per ascoltarti!
       </Muted>
 
       <Paragraph>
