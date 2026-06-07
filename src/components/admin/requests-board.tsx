@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Check,
   ChevronsUpDown,
+  Gift,
   Mail,
   Search,
   Users,
@@ -249,6 +250,12 @@ export function RequestsBoard({
                         <Mail className="mr-1 inline h-3 w-3" />
                         {row.email} · {formatDateTime(row.submittedAt)}
                       </p>
+                      {row.specialOccasion ? (
+                        <span className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-900">
+                          <Gift className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{row.specialOccasion}</span>
+                        </span>
+                      ) : null}
                     </div>
                     <UnifiedStatusBadge status={row.unifiedStatus} />
                   </Link>

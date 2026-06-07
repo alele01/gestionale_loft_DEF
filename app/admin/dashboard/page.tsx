@@ -25,7 +25,11 @@ import { UnifiedStatusBadge } from "@/components/shared/unified-status-badge";
 import { formatDateTime } from "@/lib/format";
 import { deriveUnifiedStatus } from "@/lib/status";
 import { requireAdmin } from "@/server/auth/require-admin";
-import { listEventsWithCounters } from "@/server/events/queries";
+import {
+  availableSeatsForDisplay,
+  awaitingPaymentPeople,
+  listEventsWithCounters,
+} from "@/server/events/queries";
 import type { EventStatus } from "@/server/events/schema";
 import { listLatestRequestsWithContext } from "@/server/requests/queries";
 
@@ -123,7 +127,10 @@ export default async function AdminDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => {
               const c = event.counters;
-              const availableSeats = Math.max(0, event.capacity - c.paidPeople);
+              const availableSeats = availableSeatsForDisplay(
+                event.capacity,
+                c
+              );
               return (
                 <Card key={event.id} className="flex h-full flex-col">
                   <CardContent className="flex flex-1 flex-col gap-4 p-5">
@@ -142,7 +149,7 @@ export default async function AdminDashboardPage() {
                       recap={{
                         capacity: event.capacity,
                         paidSeats: c.paidPeople,
-                        toPaySeats: c.bookingsAwaitingPayment,
+                        toPaySeats: awaitingPaymentPeople(c),
                         availableSeats,
                       }}
                     />

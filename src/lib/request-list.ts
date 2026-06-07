@@ -17,6 +17,7 @@ export type RequestListItem = {
   eventTitle: string;
   eventStartsAt: string;
   unifiedStatus: UnifiedStatus;
+  specialOccasion: string | null;
 };
 
 /**
@@ -33,8 +34,9 @@ type RequestContextLike = {
     requester_phone: string;
     people: number;
     submitted_at: string;
+    special_occasion: string | null;
   };
-  booking: { people: number | null } | null;
+  booking: { people: number | null; special_occasion: string | null } | null;
   event: { id: string; title: string; starts_at: string };
   unifiedStatus: UnifiedStatus;
 };
@@ -52,6 +54,8 @@ export function toRequestListItem(ctx: RequestContextLike): RequestListItem {
     eventTitle: ctx.event.title,
     eventStartsAt: ctx.event.starts_at,
     unifiedStatus: ctx.unifiedStatus,
+    specialOccasion:
+      ctx.booking?.special_occasion ?? ctx.request.special_occasion ?? null,
   };
 }
 

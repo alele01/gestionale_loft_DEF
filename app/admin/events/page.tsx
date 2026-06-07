@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EventsList, type EventListItem } from "@/components/admin/events-list";
 import { requireAdmin } from "@/server/auth/require-admin";
-import { listEventsWithCounters } from "@/server/events/queries";
+import {
+  availableSeatsForDisplay,
+  awaitingPaymentPeople,
+  listEventsWithCounters,
+} from "@/server/events/queries";
 import type { EventStatus } from "@/server/events/schema";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +27,8 @@ export default async function AdminEventsPage() {
     priceCents: event.price_cents,
     status: event.status as EventStatus,
     paidPeople: event.counters.paidPeople,
-    awaitingPayment: event.counters.bookingsAwaitingPayment,
+    awaitingPaymentPeople: awaitingPaymentPeople(event.counters),
+    availableSeats: availableSeatsForDisplay(event.capacity, event.counters),
   }));
 
   return (

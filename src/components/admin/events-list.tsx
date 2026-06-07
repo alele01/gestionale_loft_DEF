@@ -21,7 +21,8 @@ export type EventListItem = {
   priceCents: number;
   status: EventStatus;
   paidPeople: number;
-  awaitingPayment: number;
+  awaitingPaymentPeople: number;
+  availableSeats: number;
 };
 
 export function EventsList({ events }: { events: EventListItem[] }) {
@@ -55,7 +56,7 @@ export function EventsList({ events }: { events: EventListItem[] }) {
         </Card>
       ) : (
         filtered.map((event) => {
-          const availableSeats = Math.max(0, event.capacity - event.paidPeople);
+          const availableSeats = event.availableSeats;
           return (
             <Card key={event.id}>
               <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center">
@@ -72,7 +73,7 @@ export function EventsList({ events }: { events: EventListItem[] }) {
                       recap={{
                         capacity: event.capacity,
                         paidSeats: event.paidPeople,
-                        toPaySeats: event.awaitingPayment,
+                        toPaySeats: event.awaitingPaymentPeople,
                         availableSeats,
                       }}
                     />

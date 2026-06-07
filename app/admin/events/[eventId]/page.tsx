@@ -22,6 +22,8 @@ import { toRequestListItem } from "@/lib/request-list";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { getAppBaseUrl } from "@/server/env";
 import {
+  availableSeatsForDisplay,
+  awaitingPaymentPeople,
   getEventById,
   getEventCounters,
 } from "@/server/events/queries";
@@ -43,7 +45,10 @@ export default async function EventDetailPage({
   const counters = await getEventCounters(event.id);
   const eventRequests = await listRequestsForEvent(event.id);
   const requestItems = eventRequests.map(toRequestListItem);
-  const availableSeats = Math.max(0, event.capacity - counters.paidPeople);
+  const availableSeats = availableSeatsForDisplay(event.capacity, counters);
+  const awaitingPeople = awaitingPaymentPeople(counters);
+  const awaitingBookings =
+    counters.bookingsAwaitingCompletion + counters.bookingsAwaitingPayment;
   const status = event.status as EventStatus;
   const isDraft = status === "draft";
   const isArchived = status === "archived";
@@ -190,29 +195,43 @@ export default async function EventDetailPage({
               recap={{
                 capacity: event.capacity,
                 paidSeats: counters.paidPeople,
-                toPaySeats:
-                  counters.bookingsAwaitingCompletion +
-                  counters.bookingsAwaitingPayment,
+                toPaySeats: awaitingPeople,
                 availableSeats,
               }}
             />
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <Stat label="Posti pagati" value={counters.paidPeople} />
+              <Stat
+                label="Posti pagati"
+                seats={counters.paidPeople}
+                bookings={counters.bookingsPaid}
+              />
               <Stat
                 label="In attesa di pagamento"
-                value={
-                  counters.bookingsAwaitingCompletion +
-                  counters.bookingsAwaitingPayment
-                }
+                seats={awaitingPeople}
+                bookings={awaitingBookings}
               />
-              <Stat label="Da valutare" value={counters.requestsPending} />
-              <Stat label="Lista d'attesa" value={counters.requestsWaitlisted} />
-              <Stat label="Rifiutati" value={counters.requestsRejected} />
-              <Stat label="Disponibili" value={availableSeats} />
+              <Stat
+                label="Da valutare"
+                seats={counters.requestsPendingPeople}
+                bookings={counters.requestsPending}
+              />
+              <Stat
+                label="Lista d'attesa"
+                seats={counters.requestsWaitlistedPeople}
+                bookings={counters.requestsWaitlisted}
+              />
+              <Stat
+                label="Rifiutati"
+                seats={counters.requestsRejectedPeople}
+                bookings={counters.requestsRejected}
+              />
+              <Stat label="Disponibili" seats={availableSeats} />
             </div>
             <p className="text-[11px] text-muted-foreground">
-              I posti disponibili si calcolano sottraendo solo le prenotazioni
-              pagate.
+              I posti disponibili si calcolano sottraendo dalla capienza sia le
+              prenotazioni pagate sia quelle in attesa di pagamento. Per ogni
+              voce trovi i <strong>posti</strong> (persone) e, sotto, il numero
+              di <strong>prenotazioni</strong>.
             </p>
           </CardContent>
         </Card>
@@ -268,11 +287,27 @@ export default async function EventDetailPage({
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({
+  label,
+  seats,
+  bookings,
+}: {
+  label: string;
+  seats: number;
+  bookings?: number;
+}) {
   return (
     <div className="rounded-md bg-muted/40 px-2 py-1.5">
-      <div className="text-base font-semibold tabular-nums">{value}</div>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+      <div className="flex items-baseline gap-1">
+        <span className="text-base font-semibold tabular-nums">{seats}</span>
+        <span className="text-[10px] text-muted-foreground">posti</span>
+      </div>
+      {bookings !== undefined ? (
+        <div className="text-[10px] tabular-nums text-muted-foreground">
+          {bookings} {bookings === 1 ? "prenotazione" : "prenotazioni"}
+        </div>
+      ) : null}
+      <div className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
     </div>
