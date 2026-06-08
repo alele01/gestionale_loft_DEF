@@ -683,11 +683,6 @@ function FormBody({
                 name="addressCountry"
                 value={addressCountry}
               />
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Se desideri ricevere la fattura con intestazione estera,{" "}
-                <strong>contatta il team</strong> prima di completare la
-                prenotazione.
-              </p>
             </Field>
           </div>
         </CardContent>
