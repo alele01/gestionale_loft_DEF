@@ -29,6 +29,7 @@ const EMAIL_AUDIT_ACTION: Record<EmailId, (typeof AUDIT_ACTIONS)[keyof typeof AU
   E8: AUDIT_ACTIONS.emailE8,
   E9: AUDIT_ACTIONS.emailE9,
   E10: AUDIT_ACTIONS.emailE10,
+  E11: AUDIT_ACTIONS.emailE11,
 };
 
 const AUDIT_ENTITY_BY_TYPE: Record<EmailEntityType, "booking_request" | "booking" | "xml_export"> = {

@@ -68,6 +68,13 @@ export const AUDIT_ACTIONS = {
   emailE8: "side_effect.email.E8",
   emailE9: "side_effect.email.E9",
   emailE10: "side_effect.email.E10",
+  emailE11: "side_effect.email.E11",
+  /**
+   * Admin bulk action: payment reminders (E11) sent to every booking of an
+   * event still awaiting completion/payment. One summary row per run;
+   * per-recipient sends are tracked by the usual `side_effect.email.E11`.
+   */
+  eventPaymentRemindersSent: "event.payment_reminders_sent",
 
   // Stripe side-effects (real Checkout integration since Phase 5)
   stripeCheckoutCreated: "side_effect.stripe.checkout_created",

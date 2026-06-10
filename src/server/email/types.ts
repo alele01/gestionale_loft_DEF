@@ -20,6 +20,7 @@ export const EMAIL_IDS = [
   "E8",
   "E9",
   "E10",
+  "E11",
 ] as const;
 
 export type EmailId = (typeof EMAIL_IDS)[number];

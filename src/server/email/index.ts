@@ -36,6 +36,8 @@ export { sendE9ReviewRequest } from "./senders/send-e9";
 export type { SendE9Input } from "./senders/send-e9";
 export { sendE10AccountantExport } from "./senders/send-e10";
 export type { SendE10Input } from "./senders/send-e10";
+export { sendE11PaymentReminder } from "./senders/send-e11";
+export type { SendE11Input } from "./senders/send-e11";
 
 export type {
   AcceptanceMode,

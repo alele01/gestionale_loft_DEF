@@ -13,13 +13,21 @@ import {
   adminSchemas,
   parseAdminInput,
 } from "@/server/admin/validate-input";
+import { appendAuditLog } from "@/server/audit/log";
+import {
+  AUDIT_ACTIONS,
+  AUDIT_ACTORS,
+  AUDIT_ENTITIES,
+} from "@/server/audit-actions";
 import { requireAdmin } from "@/server/auth/require-admin";
 import {
   sendE2RequestAccepted,
   sendE5AcceptedFromWaitlist,
   sendE7PaymentRetry,
+  sendE11PaymentReminder,
   type EmailSendResult,
 } from "@/server/email";
+import { buildPaymentRetryUrl } from "@/server/email/format";
 import { serverEnv } from "@/server/env";
 import { getServiceClient } from "@/server/supabase";
 
@@ -295,6 +303,142 @@ export async function resendCompletionEmailAction(input: {
     }
     // eslint-disable-next-line no-console
     console.error("[bookings.resendCompletionEmailAction]", err);
+    return { status: "error", message: "Errore inatteso" };
+  }
+}
+
+const SendEventPaymentRemindersInputSchema = z.object({
+  eventId: adminSchemas.uuid,
+});
+
+export type EventPaymentRemindersResult =
+  | {
+      status: "ok";
+      /** Reminders actually sent in this run. */
+      sent: number;
+      /** Skipped because a reminder already went out today (daily dedup). */
+      alreadySentToday: number;
+      /** awaiting_completion bookings whose completion link is expired. */
+      skippedExpiredLink: number;
+      /** Sends that failed (transport error or missing data). */
+      failed: number;
+    }
+  | { status: "error"; message: string };
+
+/**
+ * Bulk "payment reminder" for one event: sends E11 to every booking still
+ * in `awaiting_completion` / `awaiting_payment`.
+ *
+ * Safety properties (see docs/SECURITY.md §5–§6 for the payment side):
+ *  - No Stripe session is created here. The E11 CTA points to the existing
+ *    `/complete/[token]` or `/pay/[bookingId]` pages; checkout sessions are
+ *    created/reused only when the user clicks, with all the usual guards
+ *    (revision check, amount check, paid-state no-op).
+ *  - Daily idempotency: the sender anchors on
+ *    `payment_reminder:{bookingId}:{romeDay}`, so a double click cannot
+ *    spam recipients — already-reminded bookings count as
+ *    `alreadySentToday`.
+ *  - `awaiting_completion` bookings past their `completion_deadline_at`
+ *    are skipped (their link would land on "link scaduto").
+ */
+export async function sendEventPaymentRemindersAction(input: {
+  eventId: string;
+}): Promise<EventPaymentRemindersResult> {
+  const identity = await requireAdmin();
+  try {
+    const validated = parseAdminInput(
+      SendEventPaymentRemindersInputSchema,
+      input
+    );
+    const client = getServiceClient();
+
+    const { data: bookings, error } = await client
+      .from("bookings")
+      .select(
+        "id, status, people, amount_cents, completion_deadline_at, events:event_id (title, starts_at), booking_requests:request_id (requester_first_name, requester_email)"
+      )
+      .eq("event_id", validated.eventId)
+      .in("status", ["awaiting_completion", "awaiting_payment"]);
+    if (error) throw error;
+
+    const now = new Date();
+    let sent = 0;
+    let alreadySentToday = 0;
+    let skippedExpiredLink = 0;
+    let failed = 0;
+
+    for (const booking of bookings ?? []) {
+      const event = booking.events;
+      const request = booking.booking_requests;
+      if (!event || !request) {
+        failed += 1;
+        continue;
+      }
+
+      let mode: "complete" | "pay";
+      let ctaUrl: string;
+
+      if (booking.status === "awaiting_completion") {
+        if (
+          booking.completion_deadline_at &&
+          new Date(booking.completion_deadline_at) < now
+        ) {
+          skippedExpiredLink += 1;
+          continue;
+        }
+        const linkResult = await getCompletionLinkAction({
+          bookingId: booking.id,
+        });
+        if (linkResult.status !== "ok") {
+          failed += 1;
+          continue;
+        }
+        mode = "complete";
+        ctaUrl = linkResult.url;
+      } else {
+        mode = "pay";
+        ctaUrl = buildPaymentRetryUrl(serverEnv.APP_BASE_URL, booking.id);
+      }
+
+      const result = await sendE11PaymentReminder({
+        bookingId: booking.id,
+        mode,
+        ctaUrl,
+        requesterFirstName: request.requester_first_name,
+        requesterEmail: request.requester_email,
+        eventTitle: event.title,
+        eventStartsAt: event.starts_at,
+        people: booking.people,
+        amountCents: booking.amount_cents,
+      });
+
+      if (result.status === "failed") failed += 1;
+      else if (result.deduplicated) alreadySentToday += 1;
+      else sent += 1;
+    }
+
+    await appendAuditLog({
+      entityType: AUDIT_ENTITIES.event,
+      entityId: validated.eventId,
+      action: AUDIT_ACTIONS.eventPaymentRemindersSent,
+      actorType: AUDIT_ACTORS.admin,
+      actorId: identity.adminUser.id,
+      metadata: {
+        sent,
+        already_sent_today: alreadySentToday,
+        skipped_expired_link: skippedExpiredLink,
+        failed,
+        eligible: (bookings ?? []).length,
+      },
+    });
+
+    return { status: "ok", sent, alreadySentToday, skippedExpiredLink, failed };
+  } catch (err) {
+    if (err instanceof AdminInputError) {
+      return { status: "error", message: err.message };
+    }
+    // eslint-disable-next-line no-console
+    console.error("[bookings.sendEventPaymentRemindersAction]", err);
     return { status: "error", message: "Errore inatteso" };
   }
 }

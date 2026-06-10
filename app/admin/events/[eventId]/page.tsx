@@ -15,6 +15,7 @@ import { PriceLabel } from "@/components/shared/price-label";
 import { EventStatusBadge } from "@/components/shared/status-badge";
 import { EmbedCodeBlock } from "@/components/admin/embed-code-block";
 import { EventDetailActions } from "@/components/admin/event-detail-actions";
+import { EventReminderButton } from "@/components/admin/event-reminder-button";
 import { RequestsBoard } from "@/components/admin/requests-board";
 import { DataField } from "@/components/shared/data-field";
 import { formatDateTime } from "@/lib/format";
@@ -233,6 +234,10 @@ export default async function EventDetailPage({
               voce trovi i <strong>posti</strong> (persone) e, sotto, il numero
               di <strong>prenotazioni</strong>.
             </p>
+            <EventReminderButton
+              eventId={event.id}
+              eligibleCount={awaitingBookings}
+            />
           </CardContent>
         </Card>
       </div>
