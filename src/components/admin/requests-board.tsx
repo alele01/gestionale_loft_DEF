@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UnifiedStatusBadge } from "@/components/shared/unified-status-badge";
 import { DuplicateRequestBadge } from "@/components/admin/duplicate-request-badge";
+import { RelatedEventsBadge } from "@/components/admin/related-events-badge";
 import { formatDateTime } from "@/lib/format";
 import {
   REQUEST_STATUS_HINT,
@@ -30,6 +31,7 @@ import {
   type RequestListItem,
 } from "@/lib/request-list";
 import { indexRequestDuplicates } from "@/lib/request-duplicates";
+import { indexCrossEventRelatedRequests } from "@/lib/request-related";
 import { unifiedStatusLabel, type UnifiedStatus } from "@/lib/status";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +89,28 @@ export function RequestsBoard({
   }, [eventScoped]);
 
   const duplicateIndex = React.useMemo(
-    () => indexRequestDuplicates(items),
+    () =>
+      indexRequestDuplicates(
+        items.map((it) => ({
+          id: it.id,
+          eventId: it.eventId,
+          email: it.email,
+          phone: it.phone,
+        }))
+      ),
+    [items]
+  );
+
+  const crossEventIndex = React.useMemo(
+    () =>
+      indexCrossEventRelatedRequests(
+        items.map((it) => ({
+          id: it.id,
+          eventId: it.eventId,
+          email: it.email,
+          phone: it.phone,
+        }))
+      ),
     [items]
   );
 
@@ -235,6 +258,13 @@ export function RequestsBoard({
                           <span className="ml-2 inline-flex align-middle">
                             <DuplicateRequestBadge
                               info={duplicateIndex.get(row.id)!}
+                            />
+                          </span>
+                        ) : null}
+                        {crossEventIndex.get(row.id) ? (
+                          <span className="ml-2 inline-flex align-middle">
+                            <RelatedEventsBadge
+                              info={crossEventIndex.get(row.id)!}
                             />
                           </span>
                         ) : null}

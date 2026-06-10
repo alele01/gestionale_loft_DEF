@@ -26,11 +26,13 @@ import {
 } from "@/components/ui/card";
 import { PrenotazioneDetailActions } from "@/components/admin/prenotazione-detail-actions";
 import { DuplicateRequestAlert } from "@/components/admin/duplicate-request-alert";
+import { RelatedRequestsOnOtherEventsAlert } from "@/components/admin/related-requests-on-other-events-alert";
 import { formatDateTime } from "@/lib/format";
 import { requireAdmin } from "@/server/auth/require-admin";
 import {
   getRequestContext,
   listPotentialDuplicateRequests,
+  listRelatedRequestsOnOtherEvents,
 } from "@/server/requests/queries";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +49,12 @@ export default async function PrenotazioneDetailPage({
 
   const { request, booking, event, fiscal, unifiedStatus } = ctx;
   const duplicates = await listPotentialDuplicateRequests(
+    event.id,
+    request.id,
+    request.requester_email,
+    request.requester_phone
+  );
+  const relatedOnOtherEvents = await listRelatedRequestsOnOtherEvents(
     event.id,
     request.id,
     request.requester_email,
@@ -105,6 +113,7 @@ export default async function PrenotazioneDetailPage({
       ) : null}
 
       <DuplicateRequestAlert duplicates={duplicates} />
+      <RelatedRequestsOnOtherEventsAlert related={relatedOnOtherEvents} />
 
       <PrenotazioneDetailActions
         requestId={request.id}

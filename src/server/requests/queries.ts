@@ -148,9 +148,43 @@ export type PotentialDuplicateRequest = {
   firstName: string;
   lastName: string;
   status: string;
+  unifiedStatus: UnifiedStatus;
   submittedAt: string;
   matchTypes: RequestDuplicateInfo["matchTypes"];
 };
+
+export type RelatedRequestOnOtherEvent = {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  eventStartsAt: string;
+  firstName: string;
+  lastName: string;
+  submittedAt: string;
+  unifiedStatus: UnifiedStatus;
+  matchTypes: RequestDuplicateInfo["matchTypes"];
+};
+
+function matchTypesForContact(
+  rowEmail: string,
+  rowPhone: string,
+  targetEmail: string,
+  targetPhone: string
+): RequestDuplicateInfo["matchTypes"] {
+  const matchTypes: RequestDuplicateInfo["matchTypes"] = [];
+  if (normalizeRequestEmail(rowEmail) === targetEmail) {
+    matchTypes.push("email");
+  }
+  const rowPhoneNorm = normalizeRequestPhone(rowPhone);
+  if (
+    targetPhone.length >= 8 &&
+    rowPhoneNorm === targetPhone &&
+    rowPhoneNorm.length >= 8
+  ) {
+    if (!matchTypes.includes("phone")) matchTypes.push("phone");
+  }
+  return matchTypes;
+}
 
 /**
  * Other requests on the same event that share email or phone with the
@@ -180,32 +214,88 @@ export async function listPotentialDuplicateRequests(
 
   return siblings
     .filter((row) => info.otherIds.includes(row.request.id))
-    .map((row) => {
-      const matchTypes: RequestDuplicateInfo["matchTypes"] = [];
-      if (
-        normalizeRequestEmail(row.request.requester_email) === targetEmail
-      ) {
-        matchTypes.push("email");
-      }
-      const rowPhone = normalizeRequestPhone(row.request.requester_phone);
-      if (
-        targetPhone.length >= 8 &&
-        rowPhone === targetPhone &&
-        rowPhone.length >= 8
-      ) {
-        if (!matchTypes.includes("phone")) matchTypes.push("phone");
-      }
-      return {
-        id: row.request.id,
-        firstName: row.request.requester_first_name,
-        lastName: row.request.requester_last_name,
-        status: row.request.status,
-        submittedAt: row.request.submitted_at,
-        matchTypes,
-      };
-    })
+    .map((row) => ({
+      id: row.request.id,
+      firstName: row.request.requester_first_name,
+      lastName: row.request.requester_last_name,
+      status: row.request.status,
+      unifiedStatus: row.unifiedStatus,
+      submittedAt: row.request.submitted_at,
+      matchTypes: matchTypesForContact(
+        row.request.requester_email,
+        row.request.requester_phone,
+        targetEmail,
+        targetPhone
+      ),
+    }))
     .sort(
       (a, b) =>
         Date.parse(b.submittedAt) - Date.parse(a.submittedAt)
     );
+}
+
+/**
+ * Other requests on *different* events that share email or phone with the
+ * current one. Used for cross-event duplicate warnings (informational only).
+ */
+export async function listRelatedRequestsOnOtherEvents(
+  eventId: string,
+  requestId: string,
+  email: string,
+  phone: string
+): Promise<RelatedRequestOnOtherEvent[]> {
+  const client = getServiceClient();
+  const targetEmail = normalizeRequestEmail(email);
+  const targetPhone = normalizeRequestPhone(phone);
+
+  const { data, error } = await client
+    .from("booking_requests")
+    .select(
+      `id, event_id, requester_first_name, requester_last_name, requester_email, requester_phone, status, submitted_at, events(${EVENT_SELECT}), bookings(status, cancelled_after_payment_at, voided_at)`
+    )
+    .neq("id", requestId)
+    .neq("event_id", eventId)
+    .order("submitted_at", { ascending: false });
+  if (error) throw error;
+
+  const rows: RelatedRequestOnOtherEvent[] = [];
+
+  for (const row of data ?? []) {
+    const matchTypes = matchTypesForContact(
+      row.requester_email,
+      row.requester_phone,
+      targetEmail,
+      targetPhone
+    );
+    if (matchTypes.length === 0) continue;
+
+    const event = Array.isArray(row.events) ? row.events[0] : row.events;
+    if (!event) continue;
+
+    const bookingsArr = Array.isArray(row.bookings)
+      ? row.bookings
+      : row.bookings
+        ? [row.bookings]
+        : [];
+    const booking = bookingsArr[0] ?? null;
+
+    rows.push({
+      id: row.id,
+      eventId: row.event_id,
+      eventTitle: event.title,
+      eventStartsAt: event.starts_at,
+      firstName: row.requester_first_name,
+      lastName: row.requester_last_name,
+      submittedAt: row.submitted_at,
+      unifiedStatus: deriveUnifiedStatus(
+        { status: row.status },
+        booking
+      ),
+      matchTypes,
+    });
+  }
+
+  return rows.sort(
+    (a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt)
+  );
 }
