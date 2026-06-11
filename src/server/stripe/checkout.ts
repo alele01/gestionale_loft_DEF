@@ -37,6 +37,23 @@ function computeExpiresAt(paymentDeadlineAtIso: string, nowMs: number): number {
   return Math.max(minExpiry, Math.min(maxExpiry, desired));
 }
 
+/**
+ * Stripe idempotency keys live 24h and a reuse with different params
+ * (expires_at always differs) returns `idempotency_error` instead of a
+ * session. Base key stays stable for the first creation (double-submit
+ * safety on completeBooking); re-creations append a suffix tied to the
+ * session being replaced. Stripe caps the key at 255 chars; base + the
+ * suffixes we pass (a cs_… id) stay well under that.
+ */
+function buildIdempotencyKey(
+  bookingId: string,
+  revision: number,
+  suffix?: string
+): string {
+  const base = `checkout:${bookingId}:rev${revision}`;
+  return suffix ? `${base}:${suffix}` : base;
+}
+
 function buildReturnUrls(baseUrl: string): {
   successUrl: string;
   cancelUrl: string;
@@ -142,7 +159,11 @@ export async function createCheckoutSession(
       },
     },
     {
-      idempotencyKey: `checkout:${input.booking.id}:rev${input.booking.revision}`,
+      idempotencyKey: buildIdempotencyKey(
+        input.booking.id,
+        input.booking.revision,
+        input.idempotencyKeySuffix
+      ),
     }
   );
 

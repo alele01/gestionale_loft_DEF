@@ -63,8 +63,13 @@ function isSessionUsable(session: {
   return true;
 }
 
-function idempotencyKey(bookingId: string, revision: number): string {
-  return `checkout:${bookingId}:rev${revision}`;
+function idempotencyKey(
+  bookingId: string,
+  revision: number,
+  suffix?: string
+): string {
+  const base = `checkout:${bookingId}:rev${revision}`;
+  return suffix ? `${base}:${suffix}` : base;
 }
 
 /* ---------- 1. expires_at clamping --------------------------------------- */
@@ -186,6 +191,19 @@ if (
   ok("idempotencyKey: revision bump produces different key");
 } else {
   fail("idempotencyKey", "shape mismatch");
+}
+
+// Recreation MUST NOT reuse the original creation key (Stripe rejects a
+// reused key with different expires_at for 24h → "Errore inatteso").
+const recreateKey = idempotencyKey("b-123", 2, "after:cs_live_abc");
+if (
+  recreateKey === "checkout:b-123:rev2:after:cs_live_abc" &&
+  recreateKey !== idempotencyKey("b-123", 2) &&
+  recreateKey !== idempotencyKey("b-123", 2, "after:cs_live_def")
+) {
+  ok("idempotencyKey: recreate suffix produces distinct key per stale session");
+} else {
+  fail("idempotencyKey recreate suffix", recreateKey);
 }
 
 /* ---------- 5. summary --------------------------------------------------- */

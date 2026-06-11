@@ -27,6 +27,19 @@ export type CreateCheckoutSessionInput = {
     email: string;
     fullName: string;
   };
+  /**
+   * Optional discriminator appended to the Stripe Idempotency-Key.
+   *
+   * Stripe stores idempotency keys for 24h and REJECTS a reused key when
+   * the parameters differ (`expires_at` changes on every call, so they
+   * always differ). The base key `checkout:{id}:rev{revision}` is correct
+   * for the first creation (double-submit on completeBooking returns the
+   * same session), but `recreateCheckoutSession` MUST pass a suffix tied
+   * to the session being replaced, otherwise any re-creation within 24h
+   * of the previous one fails with `idempotency_error` and the /pay page
+   * shows "Errore inatteso" until the key expires.
+   */
+  idempotencyKeySuffix?: string;
 };
 
 export type CreateCheckoutSessionResult = {

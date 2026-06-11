@@ -117,6 +117,13 @@ export async function recreateCheckoutSession(
   }
 
   // 4. Create a NEW session with the SAME revision (no booking mutation).
+  //    The idempotency suffix is tied to the session being replaced:
+  //    without it, recreating within 24h of the previous creation reuses
+  //    the same Stripe idempotency key with different params (expires_at)
+  //    and Stripe rejects with `idempotency_error` — the user would see
+  //    "Errore inatteso" on /pay until the key expires. Keying on the
+  //    stale id keeps concurrent opens of the same link idempotent while
+  //    making each generation (stale → fresh) a distinct request.
   const session = await createCheckoutSession(
     {
       booking: {
@@ -126,6 +133,7 @@ export async function recreateCheckoutSession(
         amountCents: booking.amount_cents,
         paymentDeadlineAt: booking.payment_deadline_at,
       },
+      idempotencyKeySuffix: `after:${staleId ?? "none"}`,
       event: {
         id: event.id ?? booking.event_id,
         title: event.title,
