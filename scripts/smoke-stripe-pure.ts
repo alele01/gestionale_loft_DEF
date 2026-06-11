@@ -8,7 +8,7 @@
  * graph (which throws when loaded outside Next.js).
  *
  * What this covers:
- *  - expires_at clamping window [30min, 24h]
+ *  - expires_at clamping window [35min, 24h] (30min Stripe floor + 5min buffer)
  *  - isSessionUsable rules
  *  - return URL builder shape
  *  - idempotency-key derivation (used by createCheckoutSession)
@@ -26,7 +26,7 @@ const fail = (name: string, detail: string) =>
 
 /* ---------- mirrored helpers from src/server/stripe/checkout.ts ---------- */
 
-const MIN_EXPIRY_OFFSET_SECONDS = 30 * 60;
+const MIN_EXPIRY_OFFSET_SECONDS = 35 * 60;
 const MAX_EXPIRY_OFFSET_SECONDS = 24 * 60 * 60;
 
 function computeExpiresAt(paymentDeadlineAtIso: string, nowMs: number): number {
@@ -79,13 +79,13 @@ const cases: Array<{
   expected: number;
 }> = [
   {
-    label: "<30min in the future → clamped to +30min",
+    label: "<35min in the future → clamped to +35min",
     iso: new Date(nowMs + 5 * 60 * 1000).toISOString(),
     expected: nowSec + MIN_EXPIRY_OFFSET_SECONDS,
   },
   {
-    label: "exactly 30min → kept as-is",
-    iso: new Date(nowMs + 30 * 60 * 1000).toISOString(),
+    label: "exactly 35min → kept as-is",
+    iso: new Date(nowMs + 35 * 60 * 1000).toISOString(),
     expected: nowSec + MIN_EXPIRY_OFFSET_SECONDS,
   },
   {
@@ -99,7 +99,7 @@ const cases: Array<{
     expected: nowSec + MAX_EXPIRY_OFFSET_SECONDS,
   },
   {
-    label: "deadline in the past → still clamped to +30min minimum",
+    label: "deadline in the past → still clamped to +35min minimum",
     iso: new Date(nowMs - 60 * 60 * 1000).toISOString(),
     expected: nowSec + MIN_EXPIRY_OFFSET_SECONDS,
   },

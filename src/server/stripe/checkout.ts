@@ -17,8 +17,15 @@ import type {
  * `recreate-checkout-session.ts` can issue a fresh session inside the
  * same `payment_deadline_at` as long as the booking is still in
  * `awaiting_payment`.
+ *
+ * The minimum carries a 5-minute buffer above Stripe's hard 30-minute
+ * floor: `expires_at` is computed on OUR clock before the API call, so
+ * an exact `now + 30min` can arrive at Stripe slightly under the
+ * minimum (network latency / clock skew) and the session creation gets
+ * rejected — observed in production when `payment_deadline_at` is
+ * already in the past and the value clamps to the bare minimum.
  */
-const MIN_EXPIRY_OFFSET_SECONDS = 30 * 60;
+const MIN_EXPIRY_OFFSET_SECONDS = 35 * 60;
 const MAX_EXPIRY_OFFSET_SECONDS = 24 * 60 * 60;
 
 function computeExpiresAt(paymentDeadlineAtIso: string, nowMs: number): number {
