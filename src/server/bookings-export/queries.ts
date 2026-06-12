@@ -11,11 +11,17 @@ import { getServiceClient } from "@/server/supabase";
  * does not write anything, does not touch invoice counters, and shares no
  * code with the invoicing pipeline.
  *
- * Scope: bookings that have been completed and are either already paid or
- * still awaiting payment — i.e. people the staff can reasonably expect at
- * the event. `awaiting_completion`, `expired` and `void` are excluded.
+ * Scope: bookings that are paid, awaiting payment, or awaiting completion —
+ * i.e. every accepted booking the staff can reasonably expect at the event.
+ * This matches the dashboard's "In attesa di pagamento" bucket, which also
+ * groups awaiting_completion + awaiting_payment together. `expired` and
+ * `void` (and paid-then-cancelled) are excluded.
  */
-export const EXPORTABLE_BOOKING_STATUSES = ["paid", "awaiting_payment"] as const;
+export const EXPORTABLE_BOOKING_STATUSES = [
+  "paid",
+  "awaiting_payment",
+  "awaiting_completion",
+] as const;
 
 export type BookingExportStatus = (typeof EXPORTABLE_BOOKING_STATUSES)[number];
 
@@ -102,9 +108,15 @@ export async function loadEventBookingsForExport(
     };
   });
 
-  // Sort: paid first, then awaiting payment; within each, by surname/name.
+  // Sort by status (paid → awaiting_payment → awaiting_completion), then
+  // by surname/name within each group.
+  const statusRank: Record<BookingExportStatus, number> = {
+    paid: 0,
+    awaiting_payment: 1,
+    awaiting_completion: 2,
+  };
   rows.sort((a, b) => {
-    if (a.status !== b.status) return a.status === "paid" ? -1 : 1;
+    if (a.status !== b.status) return statusRank[a.status] - statusRank[b.status];
     const byLast = a.lastName.localeCompare(b.lastName, "it", {
       sensitivity: "base",
     });

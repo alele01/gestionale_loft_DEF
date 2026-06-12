@@ -241,7 +241,11 @@ export default async function EventDetailPage({
             />
             <EventBookingsExportButton
               eventId={event.id}
-              exportableCount={counters.bookingsPaid + counters.bookingsAwaitingPayment}
+              exportableCount={
+                counters.bookingsPaid +
+                counters.bookingsAwaitingPayment +
+                counters.bookingsAwaitingCompletion
+              }
             />
           </CardContent>
         </Card>

@@ -12,7 +12,9 @@ export type BookingsXlsxEventMeta = {
 const HEADER_FILL = "FFAA2620";
 
 function statusLabel(status: BookingExportRow["status"]): string {
-  return status === "paid" ? "Pagata" : "In attesa di pagamento";
+  if (status === "paid") return "Pagata";
+  if (status === "awaiting_payment") return "In attesa di pagamento";
+  return "Da completare";
 }
 
 function imageConsentLabel(choice: string | null): string {
