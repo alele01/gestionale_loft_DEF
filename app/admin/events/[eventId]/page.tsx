@@ -16,6 +16,7 @@ import { EventStatusBadge } from "@/components/shared/status-badge";
 import { EmbedCodeBlock } from "@/components/admin/embed-code-block";
 import { EventDetailActions } from "@/components/admin/event-detail-actions";
 import { EventReminderButton } from "@/components/admin/event-reminder-button";
+import { EventBookingsExportButton } from "@/components/admin/event-bookings-export-button";
 import { RequestsBoard } from "@/components/admin/requests-board";
 import { DataField } from "@/components/shared/data-field";
 import { formatDateTime } from "@/lib/format";
@@ -237,6 +238,10 @@ export default async function EventDetailPage({
             <EventReminderButton
               eventId={event.id}
               eligibleCount={awaitingBookings}
+            />
+            <EventBookingsExportButton
+              eventId={event.id}
+              exportableCount={counters.bookingsPaid + counters.bookingsAwaitingPayment}
             />
           </CardContent>
         </Card>
