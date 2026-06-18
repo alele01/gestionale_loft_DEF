@@ -308,8 +308,9 @@ export function PrenotazioneDetailActions(props: Props) {
               {canDelete ? (
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-[11px] text-rose-900/80">
-                    Elimina la prenotazione. Sparir&agrave; dalla dashboard ma
-                    resta archiviata internamente.
+                    Elimina la prenotazione e invia al cliente un&apos;email di
+                    avviso. Sparir&agrave; dalla dashboard ma resta archiviata
+                    internamente.
                   </p>
                   <Button
                     size="sm"

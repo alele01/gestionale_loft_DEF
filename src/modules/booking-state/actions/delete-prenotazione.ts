@@ -2,6 +2,7 @@ import "server-only";
 
 import { appendAuditLogWithClient } from "@/server/audit/log";
 import { AUDIT_ACTIONS, AUDIT_ACTORS, AUDIT_ENTITIES } from "@/server/audit-actions";
+import { sendE12BookingVoided } from "@/server/email";
 
 import { createActionContext } from "../context";
 import { InvalidTransitionError, NotFoundError } from "../errors";
@@ -41,7 +42,10 @@ export async function deletePrenotazione(
 
   const requestRes = await ctx.client
     .from("booking_requests")
-    .select("*, bookings(id, status, revision)")
+    .select(
+      `*, events(id, title, starts_at),
+       bookings(id, status, revision, people)`
+    )
     .eq("id", input.requestId)
     .maybeSingle();
   if (requestRes.error) throw requestRes.error;
@@ -51,6 +55,7 @@ export async function deletePrenotazione(
   const booking = Array.isArray(request.bookings)
     ? request.bookings[0]
     : request.bookings;
+  const previousBookingStatus = booking?.status ?? null;
 
   if (booking && booking.status === "paid") {
     throw new InvalidTransitionError(
@@ -114,6 +119,22 @@ export async function deletePrenotazione(
     reason: input.reason.trim(),
     metadata: { booking_id: booking?.id ?? null },
   });
+
+  if (
+    booking &&
+    request.events &&
+    (previousBookingStatus === "awaiting_completion" ||
+      previousBookingStatus === "awaiting_payment")
+  ) {
+    await sendE12BookingVoided({
+      bookingId: booking.id,
+      requesterFirstName: request.requester_first_name,
+      requesterEmail: request.requester_email,
+      eventTitle: request.events.title,
+      eventStartsAt: request.events.starts_at,
+      people: booking.people ?? request.people,
+    });
+  }
 
   return { requestId: request.id, bookingId: booking?.id ?? null };
 }

@@ -69,6 +69,7 @@ export const AUDIT_ACTIONS = {
   emailE9: "side_effect.email.E9",
   emailE10: "side_effect.email.E10",
   emailE11: "side_effect.email.E11",
+  emailE12: "side_effect.email.E12",
   /**
    * Admin bulk action: payment reminders (E11) sent to every booking of an
    * event still awaiting completion/payment. One summary row per run;

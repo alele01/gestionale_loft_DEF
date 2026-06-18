@@ -38,6 +38,8 @@ export { sendE10AccountantExport } from "./senders/send-e10";
 export type { SendE10Input } from "./senders/send-e10";
 export { sendE11PaymentReminder } from "./senders/send-e11";
 export type { SendE11Input } from "./senders/send-e11";
+export { sendE12BookingVoided } from "./senders/send-e12";
+export type { SendE12Input } from "./senders/send-e12";
 
 export type {
   AcceptanceMode,
