@@ -55,7 +55,7 @@ export default async function AdminExportsPage() {
   const exportsRes = await client
     .from("xml_exports")
     .select(
-      "id, period_start, period_end, status, storage_path, emailed_at, recipient_email"
+      "id, period_start, period_end, status, storage_path, emailed_at, recipient_email, error_message"
     )
     .order("created_at", { ascending: false })
     .limit(50);
@@ -88,6 +88,7 @@ export default async function AdminExportsPage() {
     emailedAt: e.emailed_at,
     invoiceCount: itemsCount.get(e.id) ?? 0,
     recipientEmail: e.recipient_email,
+    errorMessage: e.error_message,
   }));
 
   // Eligible bookings for the selection card: paid, not yet exported.

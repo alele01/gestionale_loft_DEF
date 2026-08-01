@@ -40,6 +40,8 @@ export type PastExportRow = {
   emailedAt: string | null;
   invoiceCount: number;
   recipientEmail: string;
+  /** Present when status is failed; used to distinguish empty periods from real errors. */
+  errorMessage: string | null;
 };
 
 type Props = {
@@ -124,7 +126,10 @@ export function PastExportsTable({ rows }: Props) {
                       {formatShortDate(x.periodEnd)}
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={x.status} />
+                      <StatusBadge
+                        status={x.status}
+                        errorMessage={x.errorMessage}
+                      />
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {x.invoiceCount}
@@ -169,7 +174,16 @@ export function PastExportsTable({ rows }: Props) {
   );
 }
 
-function StatusBadge({ status }: { status: PastExportRow["status"] }) {
+const EMPTY_PERIOD_ERROR =
+  "Nessuna prenotazione idonea nel periodo selezionato.";
+
+function StatusBadge({
+  status,
+  errorMessage,
+}: {
+  status: PastExportRow["status"];
+  errorMessage: string | null;
+}) {
   if (status === "emailed") {
     return (
       <span className="inline-flex items-center gap-1 text-sm text-emerald-700">
@@ -178,8 +192,15 @@ function StatusBadge({ status }: { status: PastExportRow["status"] }) {
       </span>
     );
   }
+  if (status === "failed" && errorMessage === EMPTY_PERIOD_ERROR) {
+    return <Badge variant="muted">Nessuna fattura</Badge>;
+  }
   if (status === "failed") {
-    return <Badge className="border-transparent bg-rose-100 text-rose-900">Fallito</Badge>;
+    return (
+      <Badge className="border-transparent bg-rose-100 text-rose-900">
+        Fallito
+      </Badge>
+    );
   }
   if (status === "generated") {
     return <Badge variant="muted">Generato (email pendente)</Badge>;
