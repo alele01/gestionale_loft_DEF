@@ -39,6 +39,9 @@ const EMBED_FRAME_ANCESTORS = [
   "'self'",
   "https://loft.cookergirl.com",
   "https://*.cookergirl.com",
+  // Temporary: new site preview on Cloudflare Workers. Remove once the
+  // public site is back on loft.cookergirl.com.
+  "https://loft.site-318.workers.dev",
 ].join(" ");
 
 const nextConfig: NextConfig = {
